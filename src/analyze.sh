@@ -153,12 +153,13 @@ generate() {
     cd "${repo_dir}" || exit
 
     git log \
-        --follow \
-        --pretty=format:'[%h] %an %ad %s' \
+        --all \
+        --numstat \
         --date=short \
+        --pretty=format:'--%h--%ad--%aN' \
+        --no-renames \
         --after="${after}" \
         --before="${before}" \
-        --numstat \
         -- "${folder}" >"${repo_log_path}" || exit
 
     cloc "${folder}" --vcs git --by-file --csv --quiet >"${code_lines_path}" || exit
@@ -169,9 +170,9 @@ generate() {
 inspect() {
     echo Summary
 
-    maat -l "${repo_log_path}" -c git -a summary || exit
+    maat -l "${repo_log_path}" -c git2 -a summary || exit
 
-    maat -l "${repo_log_path}" -c git -a revisions >"${revisions_path}" || exit
+    maat -l "${repo_log_path}" -c git2 -a revisions >"${revisions_path}" || exit
 
     python "${scripts_path}/merge/merge_comp_freqs.py" \
         "${revisions_path}" \
