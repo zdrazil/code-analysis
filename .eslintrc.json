@@ -1,0 +1,25 @@
+{
+  "env": {
+    "es2021": true,
+    "node": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/recommended-requiring-type-checking",
+    "plugin:wc/recommended",
+    "prettier"
+  ],
+  "ignorePatterns": ["assets/vendor/**/*"],
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "project": true,
+    "sourceType": "module"
+  },
+  "plugins": ["@typescript-eslint"],
+  "root": true,
+  "rules": {
+    "curly": ["warn", "multi-line", "consistent"],
+    "@typescript-eslint/no-var-requires": "off"
+  }
+}
