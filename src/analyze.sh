@@ -185,5 +185,5 @@ inspect() {
 generate &&
     inspect &&
     cd "${scripts_path}/transform" &&
-    echo "Running on http://localhost:8888/crime-scene-hotspots.html." &&
+    echo "Running on http://localhost:8888/crime-scene-hotspots.html" &&
     python -m http.server 8888
