@@ -2,6 +2,7 @@
   "recommendations": [
     "foxundermoon.shell-format",
     "timonwong.shellcheck",
-    "esbenp.prettier-vscode"
+    "esbenp.prettier-vscode",
+    "GrapeCity.gc-excelviewer"
   ]
 }
