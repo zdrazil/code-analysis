@@ -1,26 +1,39 @@
 #!/usr/bin/env bash
 # shellcheck enable=all
+
 # Usage info
 show_help() {
     cat <<EOF
 Usage: ${0##*/} --repo <PATH>
 
-Analyzes code in git repository via code-maat.
+Example usage:
+    ${0##*/} --repo /path/to/repo --folder src --since "6 months" --until "3 months"
 
-    -h, --help           Prints help information.
+Analyzes code in your git repository via code-maat. Once you run the analysis, you’ll find several reports in the reports folder.
 
-    -r, --repo <PATH>    Path to a repo you want to analyze.
+You can also visit http://localhost:8888/crime-scene-hotspots.html to visually analyze the hotspots in your code.
+
+Reading Your Code as a Crime Scene is highly recommended to understand the reports (https://pragprog.com/titles/atcrime/your-code-as-a-crime-scene/).
+
+You can also visit 
+
+    -h, --help           Print this help information.
+
+    -r, --repo <PATH>    Specify the path to the repository you 
+                         want to analyze.
     
-    -f, --folder <PATH>  Relative path to a folder in your repo 
-                         you want to analyze.
-                         If not specified, whole repo is analyzed.
+    -f, --folder <PATH>  Specify a path relative to your repository
+                         that you want to analyze. If not specified
+                         the entire repository will be analyzed.
+
     
-    --since <date>       Analyze commits more recent than a specific date.
-                         Supports same formats as git log --since. Defaults to 6 months.
+    --since <date>       Analyze commits more recent than the specified date. 
+                         Date should be in the same format as git log --since. 
+                         Defaults to 6 months ago.
     
-    --until <date>       Analyze commits older than a specific date.
-                         Supports same date formats as git log --until.
-                         Defaults includes even today.
+    --until <date>       Analyze commits older than the specified date.
+                         Date should be in the same format as git log --until. 
+                         Defaults to include even today.
 EOF
 }
 
@@ -34,12 +47,12 @@ die() {
 since="6 months"
 until="tomorrow"
 folder="."
-repo_dir="${HOME}/projects/my-project"
+repo_dir=""
 
 while :; do
     case $1 in
     -h | -\? | --help)
-        show_help # Display a usage synopsis.
+        show_help
         exit
         ;;
     -r | --repo) # Takes an option argument; ensure it has been specified.
@@ -111,6 +124,10 @@ while :; do
 
     shift
 done
+
+if [[ -z "${repo_dir}" ]]; then
+    die 'ERROR: "--repo" is a required argument.'
+fi
 
 # echo $folder
 # echo $repo_dir

@@ -1,4 +1,3 @@
 .direnv
 generated/
-node_modules
 scripts/
