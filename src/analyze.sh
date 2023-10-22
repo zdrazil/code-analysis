@@ -11,7 +11,7 @@ Example usage:
 
 Analyzes code in your git repository via code-maat. Once you run the analysis, you’ll find several reports in the "generated" folder.
 
-You can also visit http://localhost:8888/crime-scene-hotspots.html to visually analyze the hotspots in your code.
+You can also visit http://localhost:8888/crime-scene-hotspots.html to visually analyze the hotspots in your code. The more complex a module, as measured by lines of code, the larger the circle. The more effort you spend on a module, as measured by its number of revisions, the more intense its color.
 
 Reading Your Code as a Crime Scene is highly recommended to understand the reports (https://pragprog.com/titles/atcrime/your-code-as-a-crime-scene/).
 
@@ -140,11 +140,18 @@ fi
 my_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 
 generated_path="${my_dir}/../generated"
+
 repo_log_path="${generated_path}/repo.log"
+
 code_lines_path="${generated_path}/lines.csv"
 revisions_path="${generated_path}/revisions.csv"
 complexity_effort_path="${generated_path}/complexity_effort.csv"
+
 scripts_path="${my_dir}/../scripts"
+
+sum_of_coupling_path="${generated_path}/sum_of_coupling.csv"
+temporal_coupling_path="${generated_path}/temporal_coupling"
+
 hotspots_json_path="${scripts_path}/transform/hotspots.json"
 
 generate() {
@@ -181,6 +188,14 @@ inspect() {
     python "${scripts_path}/transform/csv_as_enclosure_json.py" \
         --structure "${code_lines_path}" \
         --weights "${complexity_effort_path}" >"${hotspots_json_path}" || exit
+
+    # coupling
+    maat -l "${repo_log_path}" -c git2 -a soc >"${sum_of_coupling_path}" || exit
+
+    coupling_command="maat -l ${repo_log_path} -c git2 -a coupling"
+    ${coupling_command} --min-coupling 10 >"${temporal_coupling_path}"-10.csv
+    ${coupling_command} --min-coupling 20 >"${temporal_coupling_path}"-20.csv
+    ${coupling_command} >"${temporal_coupling_path}"-30.csv
 }
 
 generate &&
