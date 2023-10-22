@@ -7,9 +7,9 @@ show_help() {
 Usage: ${0##*/} --repo <PATH>
 
 Example usage:
-    ${0##*/} --repo /path/to/repo --folder src --since "6 months" --until "3 months"
+    ${0##*/} --repo /path/to/repo --folder src --after "6 months" --before "3 months"
 
-Analyzes code in your git repository via code-maat. Once you run the analysis, you’ll find several reports in the reports folder.
+Analyzes code in your git repository via code-maat. Once you run the analysis, you’ll find several reports in the "generated" folder.
 
 You can also visit http://localhost:8888/crime-scene-hotspots.html to visually analyze the hotspots in your code.
 
@@ -27,12 +27,12 @@ You can also visit
                          the entire repository will be analyzed.
 
     
-    --since <date>       Analyze commits more recent than the specified date. 
-                         Date should be in the same format as git log --since. 
+    --after <date>       Analyze commits more recent than the specified date. 
+                         Date should be in the same format as git log --after. 
                          Defaults to 6 months ago.
     
-    --until <date>       Analyze commits older than the specified date.
-                         Date should be in the same format as git log --until. 
+    --before <date>       Analyze commits older than the specified date.
+                         Date should be in the same format as git log --before. 
                          Defaults to include even today.
 EOF
 }
@@ -44,8 +44,8 @@ die() {
 
 # Initialize all the option variables.
 # This ensures we are not contaminated by variables from the environment.
-since="6 months"
-until="tomorrow"
+after="6 months"
+before="tomorrow"
 folder="."
 repo_dir=""
 
@@ -83,33 +83,33 @@ while :; do
     --folder=) # Handle the case of an empty --folder=
         die 'ERROR: "--folder" requires a non-empty option argument.'
         ;;
-    --since) # Takes an option argument; ensure it has been specified.
+    --after) # Takes an option argument; ensure it has been specified.
         if [[ -n "$2" ]]; then
-            since=$2
+            after=$2
             shift
         else
-            die 'ERROR: "--since" requires a non-empty option argument.'
+            die 'ERROR: "--after" requires a non-empty option argument.'
         fi
         ;;
-    --since=?*)
-        since=${1#*=} # Delete everything up to "=" and assign the remainder.
+    --after=?*)
+        after=${1#*=} # Delete everything up to "=" and assign the remainder.
         ;;
-    --since=) # Handle the case of an empty --since=
-        die 'ERROR: "--since" requires a non-empty option argument.'
+    --after=) # Handle the case of an empty --after=
+        die 'ERROR: "--after" requires a non-empty option argument.'
         ;;
-    --until) # Takes an option argument; ensure it has been specified.
+    --before) # Takes an option argument; ensure it has been specified.
         if [[ -n "$2" ]]; then
-            until=$2
+            before=$2
             shift
         else
-            die 'ERROR: "--until" requires a non-empty option argument.'
+            die 'ERROR: "--before" requires a non-empty option argument.'
         fi
         ;;
-    --until=?*)
-        until=${1#*=} # Delete everything up to "=" and assign the remainder.
+    --before=?*)
+        before=${1#*=} # Delete everything up to "=" and assign the remainder.
         ;;
-    --until=) # Handle the case of an empty --until=
-        die 'ERROR: "--until" requires a non-empty option argument.'
+    --before=) # Handle the case of an empty --before=
+        die 'ERROR: "--before" requires a non-empty option argument.'
         ;;
     --) # End of all options.
         shift
@@ -131,7 +131,7 @@ fi
 
 # echo $folder
 # echo $repo_dir
-# echo $since
+# echo $after
 
 # Rest of the program here.
 # If there are input files (for example) that follow the options, they
@@ -156,8 +156,8 @@ generate() {
         --follow \
         --pretty=format:'[%h] %an %ad %s' \
         --date=short \
-        --after="${since}" \
-        --until="${until}" \
+        --after="${after}" \
+        --before="${before}" \
         --numstat \
         -- "${folder}" >"${repo_log_path}" || exit
 
