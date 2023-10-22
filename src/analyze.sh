@@ -193,6 +193,7 @@ inspect() {
     maat -l "${repo_log_path}" -c git2 -a soc >"${sum_of_coupling_path}" || exit
 
     coupling_command="maat -l ${repo_log_path} -c git2 -a coupling"
+    ${coupling_command} --min-coupling 0 >"${temporal_coupling_path}"-0.csv
     ${coupling_command} --min-coupling 10 >"${temporal_coupling_path}"-10.csv
     ${coupling_command} --min-coupling 20 >"${temporal_coupling_path}"-20.csv
     ${coupling_command} >"${temporal_coupling_path}"-30.csv
