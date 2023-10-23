@@ -4,10 +4,11 @@
 # Usage info
 show_help() {
     cat <<EOF
-Usage: ${0##*/} --repo <PATH>
 
 Example usage:
-    ${0##*/} --repo /path/to/repo --folder src --after "6 months" --before "3 months"
+    ${0##*/} --folder src --after "6 months" --before "3 months"
+
+Run the command inside the root of your repository.
 
 Analyzes code in your git repository via code-maat. Once you run the analysis, you’ll find several reports in the "generated" folder.
 
@@ -19,9 +20,6 @@ You can also visit
 
     -h, --help           Print this help information.
 
-    -r, --repo <PATH>    Specify the path to the repository you 
-                         want to analyze.
-    
     -f, --folder <PATH>  Specify a path relative to your repository
                          that you want to analyze. If not specified
                          the entire repository will be analyzed.
@@ -47,27 +45,12 @@ die() {
 after="6 months"
 before="tomorrow"
 folder="."
-repo_dir=""
 
 while :; do
     case $1 in
     -h | -\? | --help)
         show_help
         exit
-        ;;
-    -r | --repo) # Takes an option argument; ensure it has been specified.
-        if [[ -n "$2" ]]; then
-            repo_dir=$2
-            shift
-        else
-            die 'ERROR: "--repo" requires a non-empty option argument.'
-        fi
-        ;;
-    --repo=?*)
-        repo_dir=${1#*=} # Delete everything up to "=" and assign the remainder.
-        ;;
-    --repo=) # Handle the case of an empty --repo=
-        die 'ERROR: "--repo" requires a non-empty option argument.'
         ;;
     -f | --folder) # Takes an option argument; ensure it has been specified.
         if [[ -n "$2" ]]; then
@@ -125,12 +108,7 @@ while :; do
     shift
 done
 
-if [[ -z "${repo_dir}" ]]; then
-    die 'ERROR: "--repo" is a required argument.'
-fi
-
 # echo $folder
-# echo $repo_dir
 # echo $after
 
 # Rest of the program here.
@@ -138,25 +116,23 @@ fi
 # will remain in the "$@" positional parameters.
 
 my_dir=$(cd -- "$(dirname -- $(readlink -f "${BASH_SOURCE[0]}"))" &>/dev/null && pwd)
-generated_path="${my_dir}/../generated"
+reports_path="$(pwd)/reports"
 
-repo_log_path="${generated_path}/repo.log"
+repo_log_path="${reports_path}/repo.log"
 
-code_lines_path="${generated_path}/lines.csv"
-revisions_path="${generated_path}/revisions.csv"
-complexity_effort_path="${generated_path}/complexity_effort.csv"
+code_lines_path="${reports_path}/lines.csv"
+revisions_path="${reports_path}/revisions.csv"
+complexity_effort_path="${reports_path}/complexity_effort.csv"
 
 scripts_path="${my_dir}/../scripts"
 
-sum_of_coupling_path="${generated_path}/sum_of_coupling.csv"
-temporal_coupling_path="${generated_path}/temporal_coupling"
+sum_of_coupling_path="${reports_path}/sum_of_coupling.csv"
+temporal_coupling_path="${reports_path}/temporal_coupling"
 
 hotspots_json_path="${scripts_path}/transform/hotspots.json"
 
 generate() {
-    mkdir -p "${generated_path}" || exit
-
-    cd "${repo_dir}" || exit
+    mkdir -p "${reports_path}" || exit
 
     git log \
         --all \
@@ -169,8 +145,6 @@ generate() {
         -- "${folder}" >"${repo_log_path}" || exit
 
     cloc "${folder}" --vcs git --by-file --csv --quiet >"${code_lines_path}" || exit
-
-    cd "${my_dir}" || exit
 }
 
 inspect() {

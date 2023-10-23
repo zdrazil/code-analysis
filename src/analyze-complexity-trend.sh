@@ -4,10 +4,11 @@
 # Usage info
 show_help() {
     cat <<EOF
-Usage: ${0##*/} --repo <PATH>
 
 Example usage:
-    ${0##*/} --repo /path/to/repo --file /path/to/file --after "6 months" --before "3 months" --column 2
+    ${0##*/} --file /path/to/file --after "6 months" --before "3 months" --column 2
+
+Run the command inside the root of your repository.
 
 Calculates whitespace complexity trends over a range of revisions and displays the thrend in a graph. Use the text output to identify the column you want to plot.
 
@@ -20,9 +21,6 @@ If the trend is growing, it might be caused by two things:
 Case 2 is the more worrying one. To identify if that's the case, use "sd" (standard deviation) column - column 4.
 
     -h, --help          Print this help information.
-
-    -r, --repo <PATH>   Specify the path to the repository you 
-                        want to analyze.
     
     -f, --file <PATH>   The file to calculate complexity on.
 
@@ -51,7 +49,6 @@ die() {
 after="6 months"
 before="tomorrow"
 file=""
-repo_dir=""
 column="2"
 
 while :; do
@@ -59,20 +56,6 @@ while :; do
     -h | -\? | --help)
         show_help
         exit
-        ;;
-    -r | --repo) # Takes an option argument; ensure it has been specified.
-        if [[ -n "$2" ]]; then
-            repo_dir=$2
-            shift
-        else
-            die 'ERROR: "--repo" requires a non-empty option argument.'
-        fi
-        ;;
-    --repo=?*)
-        repo_dir=${1#*=} # Delete everything up to "=" and assign the remainder.
-        ;;
-    --repo=) # Handle the case of an empty --repo=
-        die 'ERROR: "--repo" requires a non-empty option argument.'
         ;;
     -f | --file) # Takes an option argument; ensure it has been specified.
         if [[ -n "$2" ]]; then
@@ -146,16 +129,8 @@ done
 
 my_dir=$(cd -- "$(dirname -- $(readlink -f "${BASH_SOURCE[0]}"))" &>/dev/null && pwd)
 
-cd "${repo_dir}" || exit
-
-if [[ -z "${repo_dir}" ]]; then
-    die 'ERROR: "--repo" is a required argument.'
-elif [[ -z "${file}" ]]; then
+if [[ -z "${file}" ]]; then
     die 'ERROR: "--file" is a required argument.'
-elif [[ -z "${before}" ]]; then
-    die 'ERROR: "--before" is a required argument.'
-elif [[ -z "${after}" ]]; then
-    die 'ERROR: "--after" is a required argument.'
 fi
 
 # echo $file
@@ -191,7 +166,6 @@ generate() {
             --file "${file}" || true) \
         --column "${column}"
 
-    cd "${my_dir}" || exit
 }
 
 generate
