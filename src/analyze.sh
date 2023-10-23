@@ -138,6 +138,8 @@ generate() {
     cloc "${folder}" --vcs git --by-file --csv --quiet >"${code_lines_path}" || exit
 }
 
+python_bin="${my_dir}/../.direnv/python-3.11/bin/python"
+
 inspect() {
     echo Summary
 
@@ -145,11 +147,11 @@ inspect() {
 
     maat -l "${repo_log_path}" -c git2 -a revisions >"${revisions_path}" || exit
 
-    python "${scripts_path}/merge/merge_comp_freqs.py" \
+    "${python_bin}" "${scripts_path}/merge/merge_comp_freqs.py" \
         "${revisions_path}" \
         "${code_lines_path}" >"${complexity_effort_path}" || exit
 
-    python "${scripts_path}/transform/csv_as_enclosure_json.py" \
+    "${python_bin}" "${scripts_path}/transform/csv_as_enclosure_json.py" \
         --structure "${code_lines_path}" \
         --weights "${complexity_effort_path}" >"${hotspots_json_path}" || exit
 
@@ -167,4 +169,4 @@ generate &&
     inspect &&
     cd "${scripts_path}/transform" &&
     echo "Running on http://localhost:8888/crime-scene-hotspots.html" &&
-    python -m http.server 8888
+    "${python_bin}" -m http.server 8888

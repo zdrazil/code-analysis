@@ -127,6 +127,8 @@ fi
 
 scripts_path="${my_dir}/../scripts"
 
+python_bin="${my_dir}/../.direnv/python-3.11/bin/python"
+
 generate() {
     log=$(
         git log \
@@ -140,12 +142,12 @@ generate() {
     end=$(echo "${log}" | head -n 1)
     start=$(echo "${log}" | tail -n 1)
 
-    python "${scripts_path}/miner/git_complexity_trend.py" \
+    "${python_bin}" "${scripts_path}/miner/git_complexity_trend.py" \
         --start "${start}" --end "${end}" \
         --file "${file}" || exit
 
-    python "${scripts_path}/plot/plot.py" \
-        --file <(python "${scripts_path}/miner/git_complexity_trend.py" \
+    "${python_bin}" "${scripts_path}/plot/plot.py" \
+        --file <("${python_bin}" "${scripts_path}/miner/git_complexity_trend.py" \
             --start "${start}" --end "${end}" \
             --file "${file}" || true) \
         --column "${column}"
