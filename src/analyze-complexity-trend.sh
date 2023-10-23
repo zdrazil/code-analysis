@@ -144,7 +144,8 @@ while :; do
     shift
 done
 
-my_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
+my_dir=$(cd -- "$(dirname -- $(readlink -f "${BASH_SOURCE[0]}"))" &>/dev/null && pwd)
+
 cd "${repo_dir}" || exit
 
 if [[ -z "${repo_dir}" ]]; then

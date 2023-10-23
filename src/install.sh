@@ -3,6 +3,11 @@
 
 my_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 
+bin_path="${HOME}/bin"
+
+ln -s "${my_dir}/analyze.sh" "${bin_path}/maat-analyze"
+ln -s "${my_dir}/analyze-complexity-trend.sh" "${bin_path}/maat-analyze-complexity-trend"
+
 install_maat() {
   wget --show-progress \
     --no-cache \
@@ -10,7 +15,7 @@ install_maat() {
     "https://github.com/adamtornhill/code-maat/releases/download/v1.0.4/code-maat-1.0.4-standalone.jar" ||
     exit
 
-  cp "${my_dir}/maat.sh" "${HOME}/bin/maat" || exit
+  cp "${my_dir}/maat.sh" "${bin_path}/maat" || exit
 }
 
 install_maat

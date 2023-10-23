@@ -137,8 +137,7 @@ fi
 # If there are input files (for example) that follow the options, they
 # will remain in the "$@" positional parameters.
 
-my_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
-
+my_dir=$(cd -- "$(dirname -- $(readlink -f "${BASH_SOURCE[0]}"))" &>/dev/null && pwd)
 generated_path="${my_dir}/../generated"
 
 repo_log_path="${generated_path}/repo.log"
