@@ -7,11 +7,9 @@ show_help() {
 Usage: ${0##*/} --repo <PATH>
 
 Example usage:
-    ${0##*/} --repo /path/to/repo --file /path/to/file --start "df6061c" --end "22aab30ac" --column 2
+    ${0##*/} --repo /path/to/repo --file /path/to/file --after "6 months" --before "3 months" --column 2
 
 Calculates whitespace complexity trends over a range of revisions and displays the thrend in a graph. Use the text output to identify the column you want to plot.
-
-Not providing the start and end argument will cause the program to output git log of a file so you can pick the right ones.
 
 First start with "total" - column 2.
 
@@ -29,9 +27,13 @@ Case 2 is the more worrying one. To identify if that's the case, use "sd" (stand
     -f, --file <PATH>   The file to calculate complexity on.
 
     
-    --start <SHA1>      The first commit hash to include.
+    --after <date>      Analyze commits more recent than the specified date. 
+                        Date should be in the same format as git log --after. 
+                        Defaults to 6 months ago.
     
-    --end <SHA1>        The last commit hash to include.
+    --before <date>     Analyze commits older than the specified date.
+                        Date should be in the same format as git log --before. 
+                        Defaults to include even today.
 
     --column <INT>      The 0 based index specifying the column to plot.
                         Default is 2.
@@ -46,8 +48,8 @@ die() {
 
 # Initialize all the option variables.
 # This ensures we are not contaminated by variables from the environment.
-start=""
-end=""
+after="6 months"
+before="tomorrow"
 file=""
 repo_dir=""
 column="2"
@@ -86,33 +88,33 @@ while :; do
     --file=) # Handle the case of an empty --file=
         die 'ERROR: "--file" requires a non-empty option argument.'
         ;;
-    --start) # Takes an option argument; ensure it has been specified.
+    --after) # Takes an option argument; ensure it has been specified.
         if [[ -n "$2" ]]; then
-            start=$2
+            after=$2
             shift
         else
-            die 'ERROR: "--start" requires a non-empty option argument.'
+            die 'ERROR: "--after" requires a non-empty option argument.'
         fi
         ;;
-    --start=?*)
-        start=${1#*=} # Delete everything up to "=" and assign the remainder.
+    --after=?*)
+        after=${1#*=} # Delete everything up to "=" and assign the remainder.
         ;;
-    --start=) # Handle the case of an empty --start=
-        die 'ERROR: "--start" requires a non-empty option argument.'
+    --after=) # Handle the case of an empty --after=
+        die 'ERROR: "--after" requires a non-empty option argument.'
         ;;
-    --end) # Takes an option argument; ensure it has been specified.
+    --before) # Takes an option argument; ensure it has been specified.
         if [[ -n "$2" ]]; then
-            end=$2
+            before=$2
             shift
         else
-            die 'ERROR: "--end" requires a non-empty option argument.'
+            die 'ERROR: "--before" requires a non-empty option argument.'
         fi
         ;;
-    --end=?*)
-        end=${1#*=} # Delete everything up to "=" and assign the remainder.
+    --before=?*)
+        before=${1#*=} # Delete everything up to "=" and assign the remainder.
         ;;
-    --end=) # Handle the case of an empty --end=
-        die 'ERROR: "--end" requires a non-empty option argument.'
+    --before=) # Handle the case of an empty --before=
+        die 'ERROR: "--before" requires a non-empty option argument.'
         ;;
     --column) # Takes an option argument; ensure it has been specified.
         if [[ -n "$2" ]]; then
@@ -145,23 +147,19 @@ done
 my_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 cd "${repo_dir}" || exit
 
-log() {
-    git log --pretty=format:"%h %ad %s" --date=short "${file}"
-}
-
 if [[ -z "${repo_dir}" ]]; then
     die 'ERROR: "--repo" is a required argument.'
 elif [[ -z "${file}" ]]; then
     die 'ERROR: "--file" is a required argument.'
-elif [[ -z "${start}" ]]; then
-    log && exit
-elif [[ -z "${end}" ]]; then
-    log && exit
+elif [[ -z "${before}" ]]; then
+    die 'ERROR: "--before" is a required argument.'
+elif [[ -z "${after}" ]]; then
+    die 'ERROR: "--after" is a required argument.'
 fi
 
 # echo $file
 # echo $repo_dir
-# echo $start
+# echo $after
 
 # Rest of the program here.
 # If there are input files (for example) that follow the options, they
@@ -170,6 +168,17 @@ fi
 scripts_path="${my_dir}/../scripts"
 
 generate() {
+    log=$(
+        git log \
+            --pretty=format:"%h" \
+            --date=short \
+            --before "${before}" \
+            --after "${after}" \
+            -- "${file}"
+    )
+
+    end=$(echo "${log}" | head -n 1)
+    start=$(echo "${log}" | tail -n 1)
 
     python "${scripts_path}/miner/git_complexity_trend.py" \
         --start "${start}" --end "${end}" \

@@ -31,7 +31,7 @@ You can also visit
                          Date should be in the same format as git log --after. 
                          Defaults to 6 months ago.
     
-    --before <date>       Analyze commits older than the specified date.
+    --before <date>      Analyze commits older than the specified date.
                          Date should be in the same format as git log --before. 
                          Defaults to include even today.
 EOF
