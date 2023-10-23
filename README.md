@@ -2,7 +2,9 @@
 
 This project is a light wrapper around [code-maat](https://github.com/adamtornhill/code-maat) and its scripts.
 
-This project performs analysis on your code, as described in Adam Tornhill’s book [Your Code as a Crime Scene](https://pragprog.com/titles/atcrime/your-code-as-a-crime-scene/).
+Project performs analysis on your code, as described in Adam Tornhill’s book [Your Code as a Crime Scene](https://pragprog.com/titles/atcrime/your-code-as-a-crime-scene/).
+
+The code is not production quality.
 
 ## Prerequisites
 
