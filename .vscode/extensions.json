@@ -1,8 +1,9 @@
 {
   "recommendations": [
-    "foxundermoon.shell-format",
-    "timonwong.shellcheck",
     "esbenp.prettier-vscode",
-    "GrapeCity.gc-excelviewer"
+    "foxundermoon.shell-format",
+    "GrapeCity.gc-excelviewer",
+    "ms-python.black-formatter",
+    "timonwong.shellcheck"
   ]
 }

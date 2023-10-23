@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# shellcheck enable=all
 
 # Usage info
 show_help() {
@@ -122,23 +121,21 @@ temporal_coupling_path="${reports_path}/temporal_coupling"
 
 hotspots_json_path="${scripts_path}/transform/hotspots.json"
 
+python_bin="${my_dir}/../.direnv/python-3.11/bin/python"
+
 generate() {
     mkdir -p "${reports_path}" || exit
 
     git log \
-        --all \
         --numstat \
         --date=short \
         --pretty=format:'--%h--%ad--%aN' \
-        --no-renames \
         --after="${after}" \
         --before="${before}" \
-        -- "${folder}" >"${repo_log_path}" || exit
+        -- "${folder}" | "${python_bin}" "${my_dir}/modify-git-log.py" >"${repo_log_path}" || exit
 
     cloc "${folder}" --vcs git --by-file --csv --quiet >"${code_lines_path}" || exit
 }
-
-python_bin="${my_dir}/../.direnv/python-3.11/bin/python"
 
 inspect() {
     echo Summary
