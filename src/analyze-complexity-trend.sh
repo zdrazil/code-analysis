@@ -4,9 +4,10 @@
 # Usage info
 show_help() {
     cat <<EOF
+Usage: ${0##*/} <FILE_PATH>
 
 Example usage:
-    ${0##*/} --file /path/to/file --after "6 months" --before "3 months" --column 2
+    ${0##*/} --after "6 months" --before "3 months" --column 2 path/to/file
 
 Run the command inside the root of your repository.
 
@@ -34,7 +35,8 @@ Case 2 is the more worrying one. To identify if that's the case, use "sd" (stand
                         Defaults to include even today.
 
     --column <INT>      The 0 based index specifying the column to plot.
-                        Default is 2.
+                        Columns: rev, n, total, mean, sd.
+                        Default is 2, "total".
                         
 EOF
 }
@@ -129,12 +131,13 @@ done
 
 my_dir=$(cd -- "$(dirname -- $(readlink -f "${BASH_SOURCE[0]}"))" &>/dev/null && pwd)
 
+file=$*
+
 if [[ -z "${file}" ]]; then
-    die 'ERROR: "--file" is a required argument.'
+    die 'ERROR: file path not provided.'
 fi
 
 # echo $file
-# echo $repo_dir
 # echo $after
 
 # Rest of the program here.

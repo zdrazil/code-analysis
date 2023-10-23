@@ -6,7 +6,7 @@ show_help() {
     cat <<EOF
 
 Example usage:
-    ${0##*/} --folder src --after "6 months" --before "3 months"
+    ${0##*/} --after "6 months" --before "3 months" src
 
 Run the command inside the root of your repository.
 
@@ -44,27 +44,12 @@ die() {
 # This ensures we are not contaminated by variables from the environment.
 after="6 months"
 before="tomorrow"
-folder="."
 
 while :; do
     case $1 in
     -h | -\? | --help)
         show_help
         exit
-        ;;
-    -f | --folder) # Takes an option argument; ensure it has been specified.
-        if [[ -n "$2" ]]; then
-            folder=$2
-            shift
-        else
-            die 'ERROR: "--folder" requires a non-empty option argument.'
-        fi
-        ;;
-    --folder=?*)
-        folder=${1#*=} # Delete everything up to "=" and assign the remainder.
-        ;;
-    --folder=) # Handle the case of an empty --folder=
-        die 'ERROR: "--folder" requires a non-empty option argument.'
         ;;
     --after) # Takes an option argument; ensure it has been specified.
         if [[ -n "$2" ]]; then
@@ -107,6 +92,12 @@ while :; do
 
     shift
 done
+
+folder=$*
+
+if [[ -z "${folder}" ]]; then
+    folder="."
+fi
 
 # echo $folder
 # echo $after
