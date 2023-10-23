@@ -6,9 +6,13 @@ Project performs analysis on your code, as described in Adam Tornhill’s book [
 
 The code is not production quality.
 
+## Compatibility
+
+I run the code on macOS with homebrew installed. No other environmnet was tested.
+
 ## Prerequisites
 
-- "$HOME/bin" in your PATH.
+- `$HOME/bin` is in your PATH.
 - Understand what [code-maat](https://github.com/adamtornhill/code-maat) can do.
 
 ### Dependencies
@@ -25,7 +29,7 @@ The code is not production quality.
 
 - virtualenv
 
-### Homebrew on MacOS
+### Homebrew on macOS
 
 You can install the dependencies with [Homebrew](https://brew.sh/):
 
@@ -36,20 +40,27 @@ sudo ln -sfn /opt/homebrew/opt/openjdk/libexec/openjdk.jdk /Library/Java/JavaVir
 
 ## Installation
 
-To install [code-maat](https://github.com/adamtornhill/code-maat) and its scripts, run the following command in your terminal:
+To install [code-maat](https://github.com/adamtornhill/code-maat), two additional commands, and some additional dependencies, run the following command in your terminal:
 
 ```bash
 src/install.sh
 ```
 
-Keep in mind that this script installs [code-maat](https://github.com/adamtornhill/code-maat) outside its folder. It also downloads extra dependencies from the internet. Take a moment to go through the script and understand what it does before you proceed.
+Keep in mind that this script:
+
+- Installs [code-maat](https://github.com/adamtornhill/code-maat) into `$HOME/bin`.
+- Downloads extra dependencies from the internet.
+- Symlinks `maat-analyze` and `maat-analyze-complexity-trend` into `$HOME/bin` so you can call them anywhere.
+
+Take a moment to go through the script and understand what it does before you proceed.
 
 ## Usage
 
-Run
+In your repository, run
 
 ```bash
-src/analyze.sh --help
+maat-analyze --help
+maat-analyze-complexity-trend --help
 ```
 
 and go from there.

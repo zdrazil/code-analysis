@@ -11,7 +11,7 @@ Example usage:
 
 Run the command inside the root of your repository.
 
-Calculates whitespace complexity trends over a range of revisions and displays the thrend in a graph. Use the text output to identify the column you want to plot.
+Calculates whitespace complexity trends over a range of revisions and displays the trend in a graph. Use the text output to identify the column you want to plot.
 
 First start with "total" - column 2.
 
@@ -22,9 +22,6 @@ If the trend is growing, it might be caused by two things:
 Case 2 is the more worrying one. To identify if that's the case, use "sd" (standard deviation) column - column 4.
 
     -h, --help          Print this help information.
-    
-    -f, --file <PATH>   The file to calculate complexity on.
-
     
     --after <date>      Analyze commits more recent than the specified date. 
                         Date should be in the same format as git log --after. 
@@ -37,7 +34,6 @@ Case 2 is the more worrying one. To identify if that's the case, use "sd" (stand
     --column <INT>      The 0 based index specifying the column to plot.
                         Columns: rev, n, total, mean, sd.
                         Default is 2, "total".
-                        
 EOF
 }
 
@@ -50,7 +46,6 @@ die() {
 # This ensures we are not contaminated by variables from the environment.
 after="6 months"
 before="tomorrow"
-file=""
 column="2"
 
 while :; do
@@ -58,20 +53,6 @@ while :; do
     -h | -\? | --help)
         show_help
         exit
-        ;;
-    -f | --file) # Takes an option argument; ensure it has been specified.
-        if [[ -n "$2" ]]; then
-            file=$2
-            shift
-        else
-            die 'ERROR: "--file" requires a non-empty option argument.'
-        fi
-        ;;
-    --file=?*)
-        file=${1#*=} # Delete everything up to "=" and assign the remainder.
-        ;;
-    --file=) # Handle the case of an empty --file=
-        die 'ERROR: "--file" requires a non-empty option argument.'
         ;;
     --after) # Takes an option argument; ensure it has been specified.
         if [[ -n "$2" ]]; then
