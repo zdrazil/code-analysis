@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# shellcheck enable=all
 
 # Usage info
 show_help() {
@@ -131,7 +130,7 @@ python_bin="${my_dir}/../.direnv/python-3.11/bin/python"
 
 generate() {
     log=$(
-        git log \
+        git log --follow \
             --pretty=format:"%h" \
             --date=short \
             --before "${before}" \
@@ -142,16 +141,15 @@ generate() {
     end=$(echo "${log}" | head -n 1)
     start=$(echo "${log}" | tail -n 1)
 
-    "${python_bin}" "${scripts_path}/miner/git_complexity_trend.py" \
+    output=$("${python_bin}" "${my_dir}/git-complexity-trend-enhanced.py" \
         --start "${start}" --end "${end}" \
-        --file "${file}" || exit
+        --file "${file}")
+
+    echo "$output" | nl -v 0 -w2 | tr ',' '\t' | column -t
 
     "${python_bin}" "${scripts_path}/plot/plot.py" \
-        --file <("${python_bin}" "${scripts_path}/miner/git_complexity_trend.py" \
-            --start "${start}" --end "${end}" \
-            --file "${file}" || true) \
+        --file <(echo "${output}") \
         --column "${column}"
-
 }
 
 generate

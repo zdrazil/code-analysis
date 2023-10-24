@@ -132,7 +132,7 @@ generate() {
 inspect() {
     echo Summary
 
-    maat -l "${repo_log_path}" -c git2 -a summary || exit
+    maat -l "${repo_log_path}" -c git2 -a summary | tr ',' '\t' | column -t || exit
 
     maat -l "${repo_log_path}" -c git2 -a revisions >"${revisions_path}" || exit
 

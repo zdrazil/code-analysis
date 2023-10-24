@@ -4,7 +4,7 @@ This project is a light wrapper around [code-maat](https://github.com/adamtornhi
 
 Project performs analysis on your code, as described in Adam Tornhill’s book [Your Code as a Crime Scene](https://pragprog.com/titles/atcrime/your-code-as-a-crime-scene/).
 
-The code is not production quality.
+The code is not production quality. It's more like a quick hack job to get something working.
 
 ## Compatibility
 
