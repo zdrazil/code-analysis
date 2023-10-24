@@ -8,7 +8,7 @@ The code is not production quality. It's more like a quick hack job to get somet
 
 ## Compatibility
 
-I run the code on macOS with homebrew installed. No other environmnet was tested.
+I ran the code on macOS with homebrew installed. I didn't test it on any other environments.
 
 ## Prerequisites
 
