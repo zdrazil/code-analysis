@@ -5,7 +5,7 @@ show_help() {
     cat <<EOF
 
 Example usage:
-    ${0##*/} --after "6 months" --before "3 months" src
+    ${0##*/} --after "6 months" --before "3 months" --filter "scripts/" src
 
 Run the command inside the root of your repository.
 
@@ -19,10 +19,8 @@ You can also visit
 
     -h, --help           Print this help information.
 
-    -f, --folder <PATH>  Specify a path relative to your repository
-                         that you want to analyze. If not specified
-                         the entire repository will be analyzed.
-
+    -f, --filter <PATH>  Specify the path you want to focus on. The command will
+                         create a copy of the reports with filtered results.
     
     --after <date>       Analyze commits more recent than the specified date. 
                          Date should be in the same format as git log --after. 
@@ -43,6 +41,7 @@ die() {
 # This ensures we are not contaminated by variables from the environment.
 after="6 months"
 before="tomorrow"
+filter=""
 
 while :; do
     case $1 in
@@ -77,6 +76,20 @@ while :; do
         ;;
     --before=) # Handle the case of an empty --before=
         die 'ERROR: "--before" requires a non-empty option argument.'
+        ;;
+    --filter) # Takes an option argument; ensure it has been specified.
+        if [[ -n "$2" ]]; then
+            filter=$2
+            shift
+        else
+            die 'ERROR: "--filter" requires a non-empty option argument.'
+        fi
+        ;;
+    --filter=?*)
+        filter=${1#*=} # Delete everything up to "=" and assign the remainder.
+        ;;
+    --filter=) # Handle the case of an empty --filter=
+        die 'ERROR: "--filter" requires a non-empty option argument.'
         ;;
     --) # End of all options.
         shift
@@ -117,7 +130,7 @@ complexity_effort_path="${reports_path}/complexity_effort.csv"
 scripts_path="${my_dir}/../scripts"
 
 sum_of_coupling_path="${reports_path}/sum_of_coupling.csv"
-temporal_coupling_path="${reports_path}/temporal_coupling"
+temporal_coupling_path="${reports_path}/temporal_coupling.csv"
 
 hotspots_json_path="${scripts_path}/transform/hotspots.json"
 
@@ -132,7 +145,8 @@ generate() {
         --pretty=format:'--%h--%ad--%aN' \
         --after="${after}" \
         --before="${before}" \
-        -- "${folder}" | "${python_bin}" "${my_dir}/modify-git-log.py" >"${repo_log_path}" || exit
+        -- "${folder}" |
+        "${python_bin}" "${my_dir}/modify-git-log.py" >"${repo_log_path}" || exit
 
     cloc "${folder}" --vcs git --by-file --csv --quiet >"${code_lines_path}" || exit
 }
@@ -156,14 +170,34 @@ inspect() {
     maat -l "${repo_log_path}" -c git2 -a soc >"${sum_of_coupling_path}" || exit
 
     coupling_command="maat -l ${repo_log_path} -c git2 -a coupling"
-    ${coupling_command} --min-coupling 0 >"${temporal_coupling_path}"-0.csv
-    ${coupling_command} --min-coupling 10 >"${temporal_coupling_path}"-10.csv
-    ${coupling_command} --min-coupling 20 >"${temporal_coupling_path}"-20.csv
-    ${coupling_command} >"${temporal_coupling_path}"-30.csv
+    ${coupling_command} --min-coupling 1 >"${temporal_coupling_path}"
+}
+
+cleanup_reports() {
+    report_files=("${complexity_effort_path}" "${sum_of_coupling_path}" "${temporal_coupling_path}")
+
+    for report_file in "${report_files[@]}"; do
+        sed -i '' "s%${folder}%%g" "$report_file"
+    done
+}
+
+filter_reports() {
+    report_files=("${complexity_effort_path}" "${sum_of_coupling_path}" "${temporal_coupling_path}")
+
+    for report_file in "${report_files[@]}"; do
+        extension="${report_file##*.}"
+        report_filename="${report_file%.*}"
+        filtered_file="${report_filename}_filtered.${extension}"
+
+        head -n 1 "$report_file" >"$filtered_file"
+        grep -F "${filter}" "$report_file" >>"$filtered_file"
+    done
 }
 
 generate &&
     inspect &&
+    cleanup_reports &&
+    filter_reports &&
     cd "${scripts_path}/transform" &&
     echo "Running on http://localhost:8888/crime-scene-hotspots.html" &&
     "${python_bin}" -m http.server 8888
