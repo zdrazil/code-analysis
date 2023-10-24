@@ -3,7 +3,6 @@
 # Usage info
 show_help() {
     cat <<EOF
-
 Example usage:
     ${0##*/} --after "6 months" --before "3 months" --filter "scripts/" src
 
@@ -15,13 +14,8 @@ You can also visit http://localhost:8888/crime-scene-hotspots.html to visually a
 
 Reading Your Code as a Crime Scene is highly recommended to understand the reports (https://pragprog.com/titles/atcrime/your-code-as-a-crime-scene/).
 
-You can also visit 
-
     -h, --help           Print this help information.
 
-    -f, --filter <PATH>  Specify the path you want to focus on. The command will
-                         create a copy of the reports with filtered results.
-    
     --after <date>       Analyze commits more recent than the specified date. 
                          Date should be in the same format as git log --after. 
                          Defaults to 6 months ago.
@@ -77,20 +71,6 @@ while :; do
     --before=) # Handle the case of an empty --before=
         die 'ERROR: "--before" requires a non-empty option argument.'
         ;;
-    --filter) # Takes an option argument; ensure it has been specified.
-        if [[ -n "$2" ]]; then
-            filter=$2
-            shift
-        else
-            die 'ERROR: "--filter" requires a non-empty option argument.'
-        fi
-        ;;
-    --filter=?*)
-        filter=${1#*=} # Delete everything up to "=" and assign the remainder.
-        ;;
-    --filter=) # Handle the case of an empty --filter=
-        die 'ERROR: "--filter" requires a non-empty option argument.'
-        ;;
     --) # End of all options.
         shift
         break
@@ -125,12 +105,10 @@ repo_log_path="${reports_path}/repo.log"
 
 code_lines_path="${reports_path}/lines.csv"
 revisions_path="${reports_path}/revisions.csv"
-complexity_effort_path="${reports_path}/complexity_effort.csv"
+
+source "$my_dir/report_paths.sh"
 
 scripts_path="${my_dir}/../scripts"
-
-sum_of_coupling_path="${reports_path}/sum_of_coupling.csv"
-temporal_coupling_path="${reports_path}/temporal_coupling.csv"
 
 hotspots_json_path="${scripts_path}/transform/hotspots.json"
 
@@ -181,23 +159,9 @@ cleanup_reports() {
     done
 }
 
-filter_reports() {
-    report_files=("${complexity_effort_path}" "${sum_of_coupling_path}" "${temporal_coupling_path}")
-
-    for report_file in "${report_files[@]}"; do
-        extension="${report_file##*.}"
-        report_filename="${report_file%.*}"
-        filtered_file="${report_filename}_filtered.${extension}"
-
-        head -n 1 "$report_file" >"$filtered_file"
-        grep -F "${filter}" "$report_file" >>"$filtered_file"
-    done
-}
-
 generate &&
     inspect &&
     cleanup_reports &&
-    filter_reports &&
     cd "${scripts_path}/transform" &&
     echo "Running on http://localhost:8888/crime-scene-hotspots.html" &&
     "${python_bin}" -m http.server 8888

@@ -7,6 +7,7 @@ bin_path="${HOME}/bin"
 
 ln -s "${my_dir}/analyze.sh" "${bin_path}/maat-analyze"
 ln -s "${my_dir}/analyze-complexity-trend.sh" "${bin_path}/maat-analyze-complexity-trend"
+ln -s "${my_dir}/filter-reports.sh" "${bin_path}/maat-filter"
 
 install_maat() {
   wget --show-progress \
