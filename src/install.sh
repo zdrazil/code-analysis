@@ -19,12 +19,13 @@ install_maat() {
   cp "${my_dir}/maat.sh" "${bin_path}/maat" || exit
 }
 
-install_maat
+# install_maat
 
 scripts_path="${my_dir}/../scripts"
 
 rm -rf "${scripts_path}" || exit
 
+# commit which was tested: 3f1afce263b193c41756af53a4cd8fc5553a3357
 git clone \
   --depth=1 \
   --branch=python3 \
