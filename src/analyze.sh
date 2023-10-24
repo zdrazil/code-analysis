@@ -4,7 +4,7 @@
 show_help() {
     cat <<EOF
 Example usage:
-    ${0##*/} --after "6 months" --before "3 months" --filter "scripts/" src
+    ${0##*/} --after "6 months" --before "3 months" src
 
 Run the command inside the root of your repository.
 
@@ -35,7 +35,6 @@ die() {
 # This ensures we are not contaminated by variables from the environment.
 after="6 months"
 before="tomorrow"
-filter=""
 
 while :; do
     case $1 in
