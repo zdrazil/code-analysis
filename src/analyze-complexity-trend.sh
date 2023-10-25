@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+trap 'pkill -P $$; exit' SIGINT SIGTERM
+
 # Usage info
 show_help() {
     cat <<EOF
@@ -22,15 +24,15 @@ Case 2 is the more worrying one. To identify if that's the case, use "sd" (stand
 
     -h, --help          Print this help information.
     
-    --after <date>      Analyze commits more recent than the specified date. 
-                        Date should be in the same format as git log --after. 
+    --after <date>      Analyze commits more recent than the specified date.
+                        Date should be in the same format as git log --after.
                         Defaults to 6 months ago.
     
     --before <date>     Analyze commits older than the specified date.
-                        Date should be in the same format as git log --before. 
+                        Date should be in the same format as git log --before.
                         Defaults to include even today.
 
-    --column <INT>      The 0 based index specifying the column to plot.
+    --column <int>      The 0 based index specifying the column to plot.
                         Columns: rev, n, total, mean, sd.
                         Default is 2, "total".
 EOF

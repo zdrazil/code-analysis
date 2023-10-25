@@ -6,11 +6,11 @@ trap 'pkill -P $$; exit' SIGINT SIGTERM
 show_help() {
     cat <<EOF
 Example usage:
-    ${0##*/} --after "6 months" --before "3 months" src
+    ${0##*/} --after "6 months" --before "3 months" --rows 10 src
 
 Run the command inside the root of your repository.
 
-Analyzes code in your git repository via code-maat. Once you run the analysis, you’ll find several reports in the "generated" folder.
+Analyzes code in your git repository via code-maat. Once you run the analysis, you’ll find several reports in the "reports" folder. It also outputs the reports, but truncated, into stdout.
 
 You can also visit http://localhost:8888/crime-scene-hotspots.html to visually analyze the hotspots in your code. The more complex a module, as measured by lines of code, the larger the circle. The more effort you spend on a module, as measured by its number of revisions, the more intense its color.
 
@@ -18,13 +18,18 @@ Reading Your Code as a Crime Scene is highly recommended to understand the repor
 
     -h, --help           Print this help information.
 
-    --after <date>       Analyze commits more recent than the specified date. 
-                         Date should be in the same format as git log --after. 
+    --after <date>       Analyze commits more recent than the specified date.
+                         Date should be in the same format as git log --after.
                          Defaults to 6 months ago.
     
     --before <date>      Analyze commits older than the specified date.
-                         Date should be in the same format as git log --before. 
+                         Date should be in the same format as git log --before.
                          Defaults to include even today.
+
+    -n, --rows <int>     Number of rows to display for each report in stdout.
+                         Reports in the "reports" are not affected by this.
+                         They will always have all the rows.
+                         Defaults to 10.
 EOF
 }
 
@@ -37,6 +42,7 @@ die() {
 # This ensures we are not contaminated by variables from the environment.
 after="6 months"
 before="tomorrow"
+rows="10"
 
 while :; do
     case $1 in
@@ -71,6 +77,20 @@ while :; do
         ;;
     --before=) # Handle the case of an empty --before=
         die 'ERROR: "--before" requires a non-empty option argument.'
+        ;;
+    -n | --rows) # Takes an option argument; ensure it has been specified.
+        if [[ -n "$2" ]]; then
+            rows=$2
+            shift
+        else
+            die 'ERROR: "--rows" requires a non-empty option argument.'
+        fi
+        ;;
+    --rows=?*)
+        rows=${1#*=} # Delete everything up to "=" and assign the remainder.
+        ;;
+    --rows=) # Handle the case of an empty --rows=
+        die 'ERROR: "--after" requires a non-empty option argument.'
         ;;
     --) # End of all options.
         shift
@@ -169,7 +189,7 @@ output_reports() {
         sed -i '' "s%${folder}%%g" "$report_file"
 
         echo reports/"$(basename "$report_file")"
-        head -n 11 "$report_file" | tr ',' '\t' | column -t
+        head -n $((rows + 1)) "$report_file" | tr ',' '\t' | column -t
         echo
     done
 }
