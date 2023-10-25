@@ -25,10 +25,6 @@ I ran the code on macOS with homebrew installed. I didn't test it on any other e
 - [python 3](https://www.python.org/)
 - [wget](https://www.gnu.org/software/wget/)
 
-### Python packages
-
-- virtualenv
-
 ### Homebrew on macOS
 
 You can install the dependencies with [Homebrew](https://brew.sh/):
@@ -40,19 +36,20 @@ sudo ln -sfn /opt/homebrew/opt/openjdk/libexec/openjdk.jdk /Library/Java/JavaVir
 
 ## Installation
 
-To install [code-maat](https://github.com/adamtornhill/code-maat), two additional commands, and some additional dependencies, run the following command in your terminal:
+To install [code-maat](https://github.com/adamtornhill/code-maat), two additional commands, and some additional dependencies, run the following commands in your terminal:
 
 ```bash
-src/install.sh
+make
+make install
 ```
 
-Keep in mind that this script:
+Keep in mind that these commands will (among other things):
 
-- Installs [code-maat](https://github.com/adamtornhill/code-maat) into `$HOME/bin`.
-- Downloads extra dependencies from the internet.
-- Symlinks `maat-analyze` and `maat-analyze-complexity-trend` into `$HOME/bin` so you can call them anywhere.
+- Install [code-maat](https://github.com/adamtornhill/code-maat) into `$HOME/bin`.
+- Download extra dependencies from the internet.
+- Symlink `maat-analyze` and `maat-analyze-complexity-trend` into `$HOME/bin` so you can call them anywhere.
 
-Take a moment to go through the script and understand what it does before you proceed.
+Take a moment to go through the Makefile and understand what it does before you proceed.
 
 ## Usage
 
@@ -64,6 +61,12 @@ maat-analyze-complexity-trend --help
 ```
 
 and go from there.
+
+## Uninstallation
+
+```bash
+make uninstall
+```
 
 ## Related
 
