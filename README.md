@@ -58,6 +58,7 @@ In your repository, run
 ```bash
 maat-analyze --help
 maat-analyze-complexity-trend --help
+maat-filter --help
 ```
 
 and go from there.
