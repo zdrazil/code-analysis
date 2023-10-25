@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+trap 'pkill -P $$; exit' SIGINT SIGTERM
+
 # Usage info
 show_help() {
     cat <<EOF
@@ -131,9 +133,14 @@ generate() {
 inspect() {
     echo Summary
 
-    maat -l "${repo_log_path}" -c git2 -a summary | tr ',' '\t' | column -t || exit
+    maat -l "${repo_log_path}" -c git2 -a summary | tr ',' '\t' | column -t &
+    maat -l "${repo_log_path}" -c git2 -a revisions >"${revisions_path}" &
+    # coupling
+    maat -l "${repo_log_path}" -c git2 -a soc >"${sum_of_coupling_path}" &
+    coupling_command="maat -l ${repo_log_path} -c git2 -a coupling"
+    ${coupling_command} --min-coupling 1 >"${temporal_coupling_path}" &
 
-    maat -l "${repo_log_path}" -c git2 -a revisions >"${revisions_path}" || exit
+    wait
 
     "${python_bin}" "${scripts_path}/merge/merge_comp_freqs.py" \
         "${revisions_path}" \
@@ -142,12 +149,6 @@ inspect() {
     "${python_bin}" "${scripts_path}/transform/csv_as_enclosure_json.py" \
         --structure "${code_lines_path}" \
         --weights "${complexity_effort_path}" >"${hotspots_json_path}" || exit
-
-    # coupling
-    maat -l "${repo_log_path}" -c git2 -a soc >"${sum_of_coupling_path}" || exit
-
-    coupling_command="maat -l ${repo_log_path} -c git2 -a coupling"
-    ${coupling_command} --min-coupling 1 >"${temporal_coupling_path}"
 }
 
 cleanup_reports() {
