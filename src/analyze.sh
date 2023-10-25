@@ -106,6 +106,7 @@ repo_log_path="${reports_path}/repo.log"
 
 code_lines_path="${reports_path}/lines.csv"
 revisions_path="${reports_path}/revisions.csv"
+summary_path="${reports_path}/summary.csv"
 
 source "$my_dir/report_paths.sh"
 
@@ -131,9 +132,7 @@ generate() {
 }
 
 inspect() {
-    echo Summary
-
-    maat -l "${repo_log_path}" -c git2 -a summary | tr ',' '\t' | column -t &
+    maat -l "${repo_log_path}" -c git2 -a summary >"${summary_path}" &
     maat -l "${repo_log_path}" -c git2 -a revisions >"${revisions_path}" &
     # coupling
     maat -l "${repo_log_path}" -c git2 -a soc >"${sum_of_coupling_path}" &
@@ -159,9 +158,26 @@ cleanup_reports() {
     done
 }
 
+output_reports() {
+    echo "Displaying the first 10 results in each report."
+    echo "Full reports are in ${reports_path}"
+    echo
+
+    report_files=("${summary_path}" "${complexity_effort_path}" "${sum_of_coupling_path}" "${temporal_coupling_path}")
+
+    for report_file in "${report_files[@]}"; do
+        sed -i '' "s%${folder}%%g" "$report_file"
+
+        echo reports/"$(basename "$report_file")"
+        head -n 11 "$report_file" | tr ',' '\t' | column -t
+        echo
+    done
+}
+
 generate &&
     inspect &&
     cleanup_reports &&
+    output_reports &&
     cd "${scripts_path}/transform" &&
     echo "Running on http://localhost:8888/crime-scene-hotspots.html" &&
     "${python_bin}" -m http.server 8888
