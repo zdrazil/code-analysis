@@ -5,21 +5,23 @@ import re
 from typing import TextIO
 
 
-def keep_left(match):
+def extract_left(match: re.Match[str]):
     groups = match.group(0).split(" => ")
     return groups[0][1:]
 
 
-def keep_right(match):
+def extract_right(match: re.Match[str]):
     groups = match.group(0).split(" => ")
     return groups[1][:-1]
 
 
-rename_regex = r"{.+ => .+}"
+file_rename_pattern = re.compile(r"{.+ => .+}")
 separator = "\t"
 
 
 def process(stdin: TextIO, stdout: TextIO):
+    renames = {}
+
     for line in stdin:
         columns = line.split(separator)
 
@@ -29,11 +31,11 @@ def process(stdin: TextIO, stdout: TextIO):
 
         column = columns[2].replace("\n", "")
 
-        match = re.search(rename_regex, column)
+        match = file_rename_pattern.search(column)
 
         if match is not None:
-            left = re.sub(rename_regex, keep_left, column)
-            right = re.sub(rename_regex, keep_right, column)
+            left = file_rename_pattern.sub(extract_left, column)
+            right = file_rename_pattern.sub(extract_right, column)
 
             if right in renames:
                 columns[2] = renames[right]
@@ -50,8 +52,6 @@ def process(stdin: TextIO, stdout: TextIO):
         else:
             stdout.write(line)
 
-
-renames = {}
 
 if __name__ == "__main__":
     process(sys.stdin, sys.stdout)
