@@ -173,9 +173,11 @@ inspect() {
 cleanup_reports() {
     report_files=("${complexity_effort_path}" "${sum_of_coupling_path}" "${temporal_coupling_path}")
 
-    for report_file in "${report_files[@]}"; do
-        sed -i '' "s%${folder}%%g" "$report_file"
-    done
+    if [[ "$folder" != "." ]]; then
+        for report_file in "${report_files[@]}"; do
+            sed -i '' "s%${folder}%%g" "$report_file"
+        done
+    fi
 }
 
 output_reports() {
@@ -186,8 +188,6 @@ output_reports() {
     report_files=("${summary_path}" "${complexity_effort_path}" "${sum_of_coupling_path}" "${temporal_coupling_path}")
 
     for report_file in "${report_files[@]}"; do
-        sed -i '' "s%${folder}%%g" "$report_file"
-
         echo reports/"$(basename "$report_file")"
         head -n $((rows + 1)) "$report_file" | tr ',' '\t' | column -t
         echo
