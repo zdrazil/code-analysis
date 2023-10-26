@@ -2,6 +2,7 @@
 
 import sys
 import re
+from typing import TextIO
 
 
 def keep_left(match):
@@ -17,14 +18,13 @@ def keep_right(match):
 rename_regex = r"{.+ => .+}"
 separator = "\t"
 
-renames = {}
 
-if __name__ == "__main__":
-    for line in sys.stdin:
+def process(stdin: TextIO, stdout: TextIO):
+    for line in stdin:
         columns = line.split(separator)
 
         if len(columns) < 2:
-            sys.stdout.write(line)
+            stdout.write(line)
             continue
 
         column = columns[2].replace("\n", "")
@@ -43,12 +43,19 @@ if __name__ == "__main__":
                 columns[2] = right
                 renames[left] = right
 
-            print(separator.join(columns))
+            stdout.write(separator.join(columns) + "\n")
         elif column in renames:
             columns[2] = renames[column]
-            print(separator.join(columns))
+            stdout.write(separator.join(columns) + "\n")
         else:
-            sys.stdout.write(line)
+            stdout.write(line)
+
+
+renames = {}
+
+if __name__ == "__main__":
+    process(sys.stdin, sys.stdout)
+
 
 #
 # if (isRename) {

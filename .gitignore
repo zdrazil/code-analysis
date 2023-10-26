@@ -2,3 +2,4 @@
 generated/
 scripts/
 cache/
+__pycache__

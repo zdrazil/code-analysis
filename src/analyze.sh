@@ -146,7 +146,7 @@ generate() {
         --after="${after}" \
         --before="${before}" \
         -- "${folder}" |
-        "${python_bin}" "${my_dir}/modify-git-log.py" >"${repo_log_path}" || exit
+        "${python_bin}" "${my_dir}/modify_git_log.py" >"${repo_log_path}" || exit
 
     cloc "${folder}" --vcs git --by-file --csv --quiet >"${code_lines_path}" || exit
 }
