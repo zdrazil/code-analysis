@@ -15,7 +15,7 @@ def extract_right(match: re.Match[str]):
     return groups[1][:-1]
 
 
-file_rename_pattern = re.compile(r"{.+ => .+}")
+file_rename_pattern = re.compile(r"{.* => .*}")
 separator = "\t"
 
 
@@ -34,8 +34,8 @@ def process(stdin: TextIO, stdout: TextIO):
         match = file_rename_pattern.search(column)
 
         if match is not None:
-            left = file_rename_pattern.sub(extract_left, column)
-            right = file_rename_pattern.sub(extract_right, column)
+            left = file_rename_pattern.sub(extract_left, column).replace("//", "/")
+            right = file_rename_pattern.sub(extract_right, column).replace("//", "/")
 
             if right in renames:
                 columns[2] = renames[right]
