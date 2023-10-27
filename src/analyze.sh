@@ -181,7 +181,7 @@ cleanup_reports() {
 }
 
 output_reports() {
-    echo "Displaying the first 10 results in each report."
+    echo "Displaying the first" "${rows}" "results in each report."
     echo "Full reports are in ${reports_path}"
     echo
 

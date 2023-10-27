@@ -4,7 +4,7 @@
 show_help() {
     cat <<EOF
 Example usage:
-    ${0##*/} "scripts/"
+    ${0##*/} --rows 10 "scripts/"
 
 Specify the path you want to focus on. The command will
 create a copy of the reports with filtered results.
@@ -13,6 +13,11 @@ Make sure you run the command inside the root of your repository. It expects rep
 
 You can generate reports folder with maat-analyze.
     -h, --help           Print this help information.
+
+    -n, --rows <int>     Number of rows to display for each report in stdout.
+                         Reports in the "reports" are not affected by this.
+                         They will always have all the rows.
+                         Defaults to 10.
 EOF
 }
 
@@ -24,11 +29,27 @@ die() {
 # Initialize all the option variables.
 # This ensures we are not contaminated by variables from the environment.
 
+rows="10"
+
 while :; do
     case $1 in
     -h | -\? | --help)
         show_help
         exit
+        ;;
+    -n | --rows) # Takes an option argument; ensure it has been specified.
+        if [[ -n "$2" ]]; then
+            rows=$2
+            shift
+        else
+            die 'ERROR: "--rows" requires a non-empty option argument.'
+        fi
+        ;;
+    --rows=?*)
+        rows=${1#*=} # Delete everything up to "=" and assign the remainder.
+        ;;
+    --rows=) # Handle the case of an empty --rows=
+        die 'ERROR: "--after" requires a non-empty option argument.'
         ;;
     --) # End of all options.
         shift
@@ -61,6 +82,10 @@ source "$my_dir/report_paths.sh"
 filter_reports() {
     report_files=("${complexity_effort_path}" "${sum_of_coupling_path}" "${temporal_coupling_path}")
 
+    echo "Displaying the first ${rows} results in each report."
+    echo "Full reports are in ${reports_path} "
+    echo
+
     for report_file in "${report_files[@]}"; do
         extension="${report_file##*.}"
         report_filename="${report_file%.*}"
@@ -68,6 +93,11 @@ filter_reports() {
 
         head -n 1 "$report_file" >"$filtered_file"
         grep -F "${filter}" "$report_file" >>"$filtered_file"
+
+        # Output
+        echo reports/"$(basename "$filtered_file")"
+        head -n $((rows + 1)) "$filtered_file" | tr ',' '\t' | column -t
+        echo
     done
 }
 
