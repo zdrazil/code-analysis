@@ -126,6 +126,7 @@ repo_log_path="${reports_path}/repo.log"
 
 code_lines_path="${reports_path}/lines.csv"
 revisions_path="${reports_path}/revisions.csv"
+author_entity_effort_path="${reports_path}/author_entity_effort.csv"
 summary_path="${reports_path}/summary.csv"
 
 source "$my_dir/report_paths.sh"
@@ -140,6 +141,7 @@ generate() {
     mkdir -p "${reports_path}" || exit
 
     git log \
+        --follow \
         --numstat \
         --date=short \
         --pretty=format:'--%h--%ad--%aN' \
@@ -158,6 +160,10 @@ inspect() {
     maat -l "${repo_log_path}" -c git2 -a soc >"${sum_of_coupling_path}" &
     coupling_command="maat -l ${repo_log_path} -c git2 -a coupling"
     ${coupling_command} --min-coupling 1 >"${temporal_coupling_path}" &
+
+    # In addition to maat output, add percentages
+    maat -l "${repo_log_path}" -c git2 -a entity-effort | sed '/^entity,/s/$/,percent/' |
+        awk 'BEGIN { FS=OFS="," } { if (NR>1) { percentage = ($3/$4) * 100; $0 = $0 OFS percentage } print }' >"${author_entity_effort_path}" &
 
     wait
 
