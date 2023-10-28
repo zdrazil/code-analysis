@@ -8,19 +8,19 @@ show_help() {
 Usage: ${0##*/} <FILE_PATH>
 
 Example usage:
-    ${0##*/} --after "6 months" --before "3 months" --column 2 path/to/file
+    ${0##*/} --after "6 months" --before "3 months" --column sd path/to/file
 
 Run the command inside the root of your repository.
 
 Calculates whitespace complexity trends over a range of revisions and displays the trend in a graph. Use the text output to identify the column you want to plot.
 
-First start with "total" - column 2.
+First start with "total" column.
 
 If the trend is growing, it might be caused by two things:
 1. New code is added to the module.
 2. Existing code is replaced by more complex code.
 
-Case 2 is the more worrying one. To identify if that's the case, use "sd" (standard deviation) column - column 4.
+Case 2 is the more worrying one. To identify if that's the case, use "sd" (standard deviation) column.
 
     -h, --help          Print this help information.
     
@@ -32,9 +32,9 @@ Case 2 is the more worrying one. To identify if that's the case, use "sd" (stand
                         Date should be in the same format as git log --before.
                         Defaults to include even today.
 
-    --column <int>      The 0 based index specifying the column to plot.
-                        Columns: rev, n, total, mean, sd.
-                        Default is 2, "total".
+    --column <name>     Name of  the column to plot.
+                        Column names: n, total, mean, sd.
+                        Default "total".
 EOF
 }
 
@@ -46,8 +46,8 @@ die() {
 # Initialize all the option variables.
 # This ensures we are not contaminated by variables from the environment.
 after="6 months"
-before="tomorrow"
-column="2"
+before=tomorrow
+column=total
 
 while :; do
     case $1 in
@@ -149,9 +149,15 @@ generate() {
 
     echo "$output" | nl -v 0 -w2 | tr ',' '\t' | column -t
 
+    column_number=$(head -n 1 <(echo "$output") | tr ',' '\t' | awk -v b="$column" '{for (i=1;i<=NF;i++) { if ($i == b) { print i-1 } }}')
+
+    if [[ -z "${column_number}" ]]; then
+        die "ERROR: the column name $column is invalid. Supported names are n, sd, total and mean."
+    fi
+
     "${python_bin}" "${scripts_path}/plot/plot.py" \
         --file <(echo "${output}") \
-        --column "${column}"
+        --column "${column_number}"
 }
 
 generate
