@@ -29,6 +29,6 @@ if [ ${#missing_deps[@]} -gt 0 ]; then
 fi
 
 if ! echo "$PATH" | grep -q "$HOME/bin"; then
-    echo "Error: \$HOME/bin is not in you path" >&2
+    echo "Error: \$HOME/bin is not in your \$PATH" >&2
     exit 1
 fi
