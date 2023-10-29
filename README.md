@@ -41,7 +41,7 @@ Keep in mind that these commands will (among other things):
 
 - Install [code-maat](https://github.com/adamtornhill/code-maat) into `$HOME/bin`.
 - Download extra dependencies from the internet.
-- Symlink `maat-analyze` and `maat-analyze-complexity-trend` into `$HOME/bin` so you can call them anywhere.
+- Symlink `maat-analyze`, `maat-analyze-complexity-trend` and `maat-filter` into `$HOME/bin` so you can call them anywhere.
 
 Take a moment to go through the Makefile and understand what it does before you proceed.
 
