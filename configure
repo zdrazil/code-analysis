@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+dependencies=(
+    cloc
+    direnv
+    java
+    git
+    python3
+    wget
+)
+
+missing_deps=()
+
+for dependency in "${dependencies[@]}"; do
+    if ! command -v "$dependency" &>/dev/null; then
+        missing_deps+=("$dependency")
+    fi
+done
+
+if [ ${#missing_deps[@]} -gt 0 ]; then
+
+    echo "Error: The following dependencies could not be found:" >&2
+
+    for dep in "${missing_deps[@]}"; do
+        echo "$dep" >&2
+    done
+
+    exit 1
+fi
+
+if ! echo "$PATH" | grep -q "$HOME/bin"; then
+    echo "Error: \$HOME/bin is not in you path" >&2
+    exit 1
+fi

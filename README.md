@@ -8,29 +8,23 @@ The code is not production quality. It's more like a quick hack job to get somet
 
 ## Compatibility
 
-I ran the code on macOS with homebrew installed. I didn't test it on any other environments.
+I ran the code on macOS with Homebrew installed. I didn't test it in any other environment.
 
 ## Prerequisites
 
 - `$HOME/bin` is in your PATH.
+- Dependencies are installed.
+  - Dependencies are listed in the [configure](./configure) script.
 - Understand what [code-maat](https://github.com/adamtornhill/code-maat) can do.
 
-### Dependencies
-
-- bash
-- [cloc](https://github.com/AlDanial/cloc)
-- [direnv](https://direnv.net/)
-- [git](https://git-scm.com/)
-- [Java](https://www.java.com/en/)
-- [python 3](https://www.python.org/)
-- [wget](https://www.gnu.org/software/wget/)
+Run `./configure` to check that you have the prerequisites ready.
 
 ### Homebrew on macOS
 
 You can install the dependencies with [Homebrew](https://brew.sh/):
 
 ```bash
-brew install cloc direnv java git python
+brew install cloc direnv java git python wget
 sudo ln -sfn /opt/homebrew/opt/openjdk/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk.jdk
 ```
 
