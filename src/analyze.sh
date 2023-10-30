@@ -133,7 +133,8 @@ source "$my_dir/report_paths.sh"
 
 scripts_path="${my_dir}/../scripts"
 
-hotspots_json_path="${my_dir}/visualization/hotspots.json"
+hotspots_path="${reports_path}/hotspots"
+hotspots_json_path="${hotspots_path}/hotspots.json"
 
 python_bin="${my_dir}/../.direnv/python-3.11/bin/python"
 
@@ -171,6 +172,8 @@ inspect() {
         "${revisions_path}" \
         "${code_lines_path}" >"${complexity_effort_path}" || exit
 
+    mkdir p "$hotspots_path"
+
     "${python_bin}" "${scripts_path}/transform/csv_as_enclosure_json.py" \
         --structure "${code_lines_path}" \
         --weights "${complexity_effort_path}" >"${hotspots_json_path}" || exit
@@ -200,10 +203,21 @@ output_reports() {
     done
 }
 
+copy_hotspots() {
+    hotspots_files=(crime-scene-hotspots.css crime-scene-hotspots.html crime-scene-hotspots.js d3)
+
+    mkdir -p "$reports_path"/hotspots
+
+    for hotspots_file in "${hotspots_files[@]}"; do
+        cp -R "$my_dir/visualization/$hotspots_file" "$reports_path"/hotspots
+    done
+}
+
 generate &&
     inspect &&
     cleanup_reports &&
     output_reports &&
-    cd "${my_dir}/visualization" &&
+    copy_hotspots &&
+    cd "${reports_path}/hotspots" &&
     echo "Running on http://localhost:8888/crime-scene-hotspots.html" &&
     "${python_bin}" -m http.server 8888
