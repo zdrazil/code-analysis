@@ -30,7 +30,7 @@ sudo ln -sfn /opt/homebrew/opt/openjdk/libexec/openjdk.jdk /Library/Java/JavaVir
 
 ## Installation
 
-To install [code-maat](https://github.com/adamtornhill/code-maat), two additional commands, and some additional dependencies, run the following commands in your terminal:
+To install [code-maat](https://github.com/adamtornhill/code-maat), three additional commands, and some additional dependencies, run the following commands in your terminal:
 
 ```bash
 make
