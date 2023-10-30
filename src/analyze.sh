@@ -133,7 +133,7 @@ source "$my_dir/report_paths.sh"
 
 scripts_path="${my_dir}/../scripts"
 
-hotspots_json_path="${scripts_path}/transform/hotspots.json"
+hotspots_json_path="${my_dir}/visualization/hotspots.json"
 
 python_bin="${my_dir}/../.direnv/python-3.11/bin/python"
 
@@ -204,6 +204,6 @@ generate &&
     inspect &&
     cleanup_reports &&
     output_reports &&
-    cd "${scripts_path}/transform" &&
+    cd "${my_dir}/visualization" &&
     echo "Running on http://localhost:8888/crime-scene-hotspots.html" &&
     "${python_bin}" -m http.server 8888
