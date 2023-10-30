@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "checkJs": true,
+    "lib": ["ES2022", "dom", "dom.iterable"],
+    "module": "node16",
+    "moduleResolution": "Node16",
+    "outDir": "dist",
+    "target": "ES2022",
+    "jsx": "preserve"
+  },
+  "include": ["src/visualization/**/*"]
+}
