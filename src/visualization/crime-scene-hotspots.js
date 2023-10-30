@@ -25,8 +25,7 @@ const svg = d3
   .attr("width", outerDiameter)
   .attr("height", outerDiameter)
   .append("g")
-  .attr("transform", "translate(" + margin + "," + margin + ")");
-
+  .attr("transform", `translate(${margin}, ${margin})`);
 d3.json("hotspots.json", (error, root) => {
   let focus = root,
     nodes = pack.nodes(root);
@@ -57,7 +56,7 @@ d3.json("hotspots.json", (error, root) => {
         return "node node--root";
       }
     })
-    .attr("transform", (d) => "translate(" + d.x + "," + d.y + ")")
+    .attr("transform", (d) => `translate(${d.x},${d.y})`)
     .attr("r", (d) => d.r)
     .style("fill", (d) => {
       if (d.weight > 0.0) {
@@ -94,7 +93,7 @@ d3.json("hotspots.json", (error, root) => {
     .enter()
     .append("text")
     .attr("class", "label")
-    .attr("transform", (d) => "translate(" + d.x + "," + d.y + ")")
+    .attr("transform", (d) => `translate(${d.x},${d.y})`)
     .style("fill-opacity", (d) => (d.parent === root ? 1 : 0))
     .style("display", (d) => (d.parent === root ? null : "none"))
     .text((d) => d.name);
@@ -116,8 +115,7 @@ d3.json("hotspots.json", (error, root) => {
       .selectAll("text,circle")
       .transition()
       .duration(d3.event.altKey ? 7500 : 750)
-      .attr("transform", (d) => "translate(" + x(d.x) + "," + y(d.y) + ")");
-
+      .attr("transform", (d) => `translate(${x(d.x)}, ${y(d.y)})`);
     transition.filter("circle").attr("r", (d) => k * d.r);
 
     transition
@@ -125,10 +123,14 @@ d3.json("hotspots.json", (error, root) => {
       .filter((d) => d.parent === focus || d.parent === focus0)
       .style("fill-opacity", (d) => (d.parent === focus ? 1 : 0))
       .each("start", (d) => {
-        if (d.parent === focus) this.style.display = "inline";
+        if (d.parent === focus) {
+          this.style.display = "inline";
+        }
       })
       .each("end", (d) => {
-        if (d.parent !== focus) this.style.display = "none";
+        if (d.parent !== focus) {
+          this.style.display = "none";
+        }
       });
   }
 });
