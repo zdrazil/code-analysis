@@ -119,12 +119,12 @@ d3.json("hotspots.json", (error, root) => {
       .filter("text")
       .filter((d) => d.parent === focus || d.parent === focus0)
       .style("fill-opacity", (d) => (d.parent === focus ? 1 : 0))
-      .each("start", (d) => {
+      .each("start", function (d) {
         if (d.parent === focus) {
           this.style.display = "inline";
         }
       })
-      .each("end", (d) => {
+      .each("end", function (d) {
         if (d.parent !== focus) {
           this.style.display = "none";
         }
