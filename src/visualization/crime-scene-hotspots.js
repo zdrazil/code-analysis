@@ -18,9 +18,7 @@ const pack = d3.layout
   .pack()
   .padding(2)
   .size([innerDiameter, innerDiameter])
-  .value(function (d) {
-    return d.size;
-  });
+  .value((d) => d.size);
 
 const svg = d3
   .select("body")
@@ -30,7 +28,7 @@ const svg = d3
   .append("g")
   .attr("transform", "translate(" + margin + "," + margin + ")");
 
-d3.json("hotspots.json", function (error, root) {
+d3.json("hotspots.json", (error, root) => {
   let focus = root,
     nodes = pack.nodes(root);
 
@@ -49,42 +47,26 @@ d3.json("hotspots.json", function (error, root) {
     .data(nodes)
     .enter()
     .append("circle")
-    .attr("class", function (d) {
-      return d.parent
-        ? d.children
-          ? "node"
-          : "node node--leaf"
-        : "node node--root";
-    })
-    .attr("transform", function (d) {
-      return "translate(" + d.x + "," + d.y + ")";
-    })
-    .attr("r", function (d) {
-      return d.r;
-    })
-    .style("fill", function (d) {
-      return d.weight > 0.0
-        ? "darkred"
-        : d.children
-        ? color(d.depth)
-        : "WhiteSmoke";
-    })
-    .style("fill-opacity", function (d) {
-      return d.weight;
-    })
-    .on("click", function (d) {
-      return zoom(focus == d ? root : d);
-    })
-    .on("mouseover", function (d) {
+    .attr("class", (d) =>
+      d.parent ? (d.children ? "node" : "node node--leaf") : "node node--root",
+    )
+    .attr("transform", (d) => "translate(" + d.x + "," + d.y + ")")
+    .attr("r", (d) => d.r)
+    .style("fill", (d) =>
+      d.weight > 0.0 ? "darkred" : d.children ? color(d.depth) : "WhiteSmoke",
+    )
+    .style("fill-opacity", (d) => d.weight)
+    .on("click", (d) => zoom(focus == d ? root : d))
+    .on("mouseover", (d) => {
       tooltip.text(d.name);
       return tooltip.style("visibility", "visible");
     })
-    .on("mousemove", function () {
-      return tooltip
+    .on("mousemove", () =>
+      tooltip
         .style("top", d3.event.pageY - 10 + "px")
-        .style("left", d3.event.pageX + 10 + "px");
-    })
-    .on("mouseout", function () {
+        .style("left", d3.event.pageX + 10 + "px"),
+    )
+    .on("mouseout", () => {
       tooltip.text();
 
       return tooltip.style("visibility", "hidden");
@@ -97,20 +79,12 @@ d3.json("hotspots.json", function (error, root) {
     .enter()
     .append("text")
     .attr("class", "label")
-    .attr("transform", function (d) {
-      return "translate(" + d.x + "," + d.y + ")";
-    })
-    .style("fill-opacity", function (d) {
-      return d.parent === root ? 1 : 0;
-    })
-    .style("display", function (d) {
-      return d.parent === root ? null : "none";
-    })
-    .text(function (d) {
-      return d.name;
-    });
+    .attr("transform", (d) => "translate(" + d.x + "," + d.y + ")")
+    .style("fill-opacity", (d) => (d.parent === root ? 1 : 0))
+    .style("display", (d) => (d.parent === root ? null : "none"))
+    .text((d) => d.name);
 
-  d3.select(window).on("click", function () {
+  d3.select(window).on("click", () => {
     zoom(root);
   });
 
@@ -127,26 +101,18 @@ d3.json("hotspots.json", function (error, root) {
       .selectAll("text,circle")
       .transition()
       .duration(d3.event.altKey ? 7500 : 750)
-      .attr("transform", function (d) {
-        return "translate(" + x(d.x) + "," + y(d.y) + ")";
-      });
+      .attr("transform", (d) => "translate(" + x(d.x) + "," + y(d.y) + ")");
 
-    transition.filter("circle").attr("r", function (d) {
-      return k * d.r;
-    });
+    transition.filter("circle").attr("r", (d) => k * d.r);
 
     transition
       .filter("text")
-      .filter(function (d) {
-        return d.parent === focus || d.parent === focus0;
-      })
-      .style("fill-opacity", function (d) {
-        return d.parent === focus ? 1 : 0;
-      })
-      .each("start", function (d) {
+      .filter((d) => d.parent === focus || d.parent === focus0)
+      .style("fill-opacity", (d) => (d.parent === focus ? 1 : 0))
+      .each("start", (d) => {
         if (d.parent === focus) this.style.display = "inline";
       })
-      .each("end", function (d) {
+      .each("end", (d) => {
         if (d.parent !== focus) this.style.display = "none";
       });
   }
