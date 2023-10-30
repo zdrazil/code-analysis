@@ -138,7 +138,7 @@ d3.json("hotspots.json", (error, root) => {
 
         let proposedLabel = d.name;
 
-        var proposedLabelArray = proposedLabel.split("");
+        const proposedLabelArray = proposedLabel.split("");
 
         d.tw = this.getComputedTextLength();
 
