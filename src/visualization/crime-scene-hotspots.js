@@ -34,6 +34,15 @@ d3.json("hotspots.json", function (error, root) {
   var focus = root,
     nodes = pack.nodes(root);
 
+  var tooltip = d3
+    .select("body")
+    .append("div")
+    .style("position", "absolute")
+    .style("z-index", "10")
+    .style("visibility", "hidden")
+    .text("a simple tooltip")
+    .attr("class", () => "label");
+
   svg
     .append("g")
     .selectAll("circle")
@@ -65,6 +74,20 @@ d3.json("hotspots.json", function (error, root) {
     })
     .on("click", function (d) {
       return zoom(focus == d ? root : d);
+    })
+    .on("mouseover", function (d) {
+      tooltip.text(d.name);
+      return tooltip.style("visibility", "visible");
+    })
+    .on("mousemove", function () {
+      return tooltip
+        .style("top", d3.event.pageY - 10 + "px")
+        .style("left", d3.event.pageX + 10 + "px");
+    })
+    .on("mouseout", function () {
+      tooltip.text();
+
+      return tooltip.style("visibility", "hidden");
     });
 
   svg
