@@ -1,11 +1,10 @@
 // Based on https://github.com/adamtornhill/maat-scripts/blob/3f1afce263b193c41756af53a4cd8fc5553a3357/transform/crime-scene-hotspots.html
 
-const margin = 10,
-  outerDiameter = 960,
-  innerDiameter = outerDiameter - margin - margin;
+const margin = 10;
+const outerDiameter = 960;
+const innerDiameter = outerDiameter - margin - margin;
 
 const x = d3.scale.linear().range([0, innerDiameter]);
-
 const y = d3.scale.linear().range([0, innerDiameter]);
 
 const color = d3.scale
