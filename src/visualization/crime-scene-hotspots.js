@@ -26,6 +26,7 @@ const svg = d3
   .attr("height", outerDiameter)
   .append("g")
   .attr("transform", `translate(${margin}, ${margin})`);
+
 d3.json("hotspots.json", (error, root) => {
   let focus = root,
     nodes = pack.nodes(root);
@@ -72,7 +73,8 @@ d3.json("hotspots.json", (error, root) => {
       zoom(focus == d ? root : d);
     })
     .on("mouseover", (d) => {
-      tooltip.text(d.name).style("visibility", "visible");
+      tooltip.text(d.name);
+      tooltip.style("visibility", "visible");
     })
     .on("mousemove", () =>
       tooltip
@@ -80,7 +82,7 @@ d3.json("hotspots.json", (error, root) => {
         .style("left", d3.event.pageX + 10 + "px"),
     )
     .on("mouseout", () => {
-      tooltip.text().style("visibility", "hidden");
+      tooltip.style("visibility", "hidden");
     });
 
   svg
