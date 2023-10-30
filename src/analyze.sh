@@ -205,10 +205,10 @@ output_reports() {
 copy_hotspots() {
     hotspots_files=(crime-scene-hotspots.css crime-scene-hotspots.html crime-scene-hotspots.js d3)
 
-    mkdir -p "$reports_path"/hotspots
+    mkdir -p "$hotspots_path"
 
     for hotspots_file in "${hotspots_files[@]}"; do
-        cp -R "$my_dir/visualization/$hotspots_file" "$reports_path"/hotspots
+        cp -R "$my_dir/visualization/$hotspots_file" "$hotspots_path"
     done
 }
 
