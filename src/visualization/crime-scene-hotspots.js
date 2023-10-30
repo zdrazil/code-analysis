@@ -130,6 +130,32 @@ d3.json("hotspots.json", (error, root) => {
         if (d.parent !== focus) {
           this.style.display = "none";
         }
+      })
+      .each("end", function (d) {
+        if (d.parent !== focus) {
+          return;
+        }
+
+        let proposedLabel = d.name;
+
+        var proposedLabelArray = proposedLabel.split("");
+
+        d.tw = this.getComputedTextLength();
+
+        // Based on https://gist.github.com/billdwhite/7207695
+        while (d.tw > (Math.PI * (k * d.r)) / 2 && proposedLabelArray.length) {
+          // pull out 3 chars at a time to speed things up (one at a time is too slow)
+          proposedLabelArray.pop();
+          proposedLabelArray.pop();
+          proposedLabelArray.pop();
+          if (proposedLabelArray.length === 0) {
+            proposedLabel = "";
+          } else {
+            proposedLabel = proposedLabelArray.join("") + "..."; // manually truncate with ellipsis
+          }
+          d3.select(this).text(proposedLabel);
+          d.tw = this.getComputedTextLength();
+        }
       });
   }
 });
