@@ -34,8 +34,6 @@ d3.json("hotspots.json", (error, root) => {
   const tooltip = d3
     .select("body")
     .append("div")
-
-    .text("a simple tooltip")
     .attr("class", () => "tooltip");
 
   svg
