@@ -47,16 +47,32 @@ d3.json("hotspots.json", (error, root) => {
     .data(nodes)
     .enter()
     .append("circle")
-    .attr("class", (d) =>
-      d.parent ? (d.children ? "node" : "node node--leaf") : "node node--root",
-    )
+    .attr("class", (d) => {
+      if (d.parent) {
+        if (d.children) {
+          return "node";
+        } else {
+          return "node node--leaf";
+        }
+      } else {
+        return "node node--root";
+      }
+    })
     .attr("transform", (d) => "translate(" + d.x + "," + d.y + ")")
     .attr("r", (d) => d.r)
-    .style("fill", (d) =>
-      d.weight > 0.0 ? "darkred" : d.children ? color(d.depth) : "WhiteSmoke",
-    )
+    .style("fill", (d) => {
+      if (d.weight > 0.0) {
+        return "darkred";
+      } else if (d.children) {
+        return color(d.depth);
+      } else {
+        return "WhiteSmoke";
+      }
+    })
     .style("fill-opacity", (d) => d.weight)
-    .on("click", (d) => zoom(focus == d ? root : d))
+    .on("click", (d) => {
+      zoom(focus == d ? root : d);
+    })
     .on("mouseover", (d) => {
       tooltip.text(d.name);
       return tooltip.style("visibility", "visible");
