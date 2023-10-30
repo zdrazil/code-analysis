@@ -154,7 +154,7 @@ d3.json("hotspots.json", (error, root) => {
           if (proposedLabelArray.length === 0) {
             proposedLabel = "";
           } else {
-            proposedLabel = proposedLabelArray.join("") + "..."; // manually truncate with ellipsis
+            proposedLabel = proposedLabelArray.join("") + "…"; // manually truncate with ellipsis
           }
           d3.select(this).text(proposedLabel);
           textWidth = this.getComputedTextLength();
