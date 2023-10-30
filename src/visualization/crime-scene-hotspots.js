@@ -1,20 +1,20 @@
 // Based on https://github.com/adamtornhill/maat-scripts/blob/3f1afce263b193c41756af53a4cd8fc5553a3357/transform/crime-scene-hotspots.html
 
-var margin = 10,
+const margin = 10,
   outerDiameter = 960,
   innerDiameter = outerDiameter - margin - margin;
 
-var x = d3.scale.linear().range([0, innerDiameter]);
+const x = d3.scale.linear().range([0, innerDiameter]);
 
-var y = d3.scale.linear().range([0, innerDiameter]);
+const y = d3.scale.linear().range([0, innerDiameter]);
 
-var color = d3.scale
+const color = d3.scale
   .linear()
   .domain([-1, 5])
   .range(["hsl(185,60%,99%)", "hsl(187,40%,70%)"])
   .interpolate(d3.interpolateHcl);
 
-var pack = d3.layout
+const pack = d3.layout
   .pack()
   .padding(2)
   .size([innerDiameter, innerDiameter])
@@ -22,7 +22,7 @@ var pack = d3.layout
     return d.size;
   });
 
-var svg = d3
+const svg = d3
   .select("body")
   .append("svg")
   .attr("width", outerDiameter)
@@ -31,10 +31,10 @@ var svg = d3
   .attr("transform", "translate(" + margin + "," + margin + ")");
 
 d3.json("hotspots.json", function (error, root) {
-  var focus = root,
+  let focus = root,
     nodes = pack.nodes(root);
 
-  var tooltip = d3
+  const tooltip = d3
     .select("body")
     .append("div")
     .style("position", "absolute")
@@ -115,15 +115,15 @@ d3.json("hotspots.json", function (error, root) {
   });
 
   function zoom(d, i) {
-    var focus0 = focus;
+    const focus0 = focus;
     focus = d;
 
-    var k = innerDiameter / d.r / 2;
+    const k = innerDiameter / d.r / 2;
     x.domain([d.x - d.r, d.x + d.r]);
     y.domain([d.y - d.r, d.y + d.r]);
     d3.event.stopPropagation();
 
-    var transition = d3
+    const transition = d3
       .selectAll("text,circle")
       .transition()
       .duration(d3.event.altKey ? 7500 : 750)
