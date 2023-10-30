@@ -56,7 +56,7 @@ d3.json("hotspots.json", (error, root) => {
         return "node node--root";
       }
     })
-    .attr("transform", (d) => `translate(${d.x},${d.y})`)
+    .attr("transform", (d) => `translate(${d.x}, ${d.y})`)
     .attr("r", (d) => d.r)
     .style("fill", (d) => {
       if (d.weight > 0.0) {
@@ -72,8 +72,7 @@ d3.json("hotspots.json", (error, root) => {
       zoom(focus == d ? root : d);
     })
     .on("mouseover", (d) => {
-      tooltip.text(d.name);
-      return tooltip.style("visibility", "visible");
+      tooltip.text(d.name).style("visibility", "visible");
     })
     .on("mousemove", () =>
       tooltip
@@ -81,9 +80,7 @@ d3.json("hotspots.json", (error, root) => {
         .style("left", d3.event.pageX + 10 + "px"),
     )
     .on("mouseout", () => {
-      tooltip.text();
-
-      return tooltip.style("visibility", "hidden");
+      tooltip.text().style("visibility", "hidden");
     });
 
   svg
@@ -93,7 +90,7 @@ d3.json("hotspots.json", (error, root) => {
     .enter()
     .append("text")
     .attr("class", "label")
-    .attr("transform", (d) => `translate(${d.x},${d.y})`)
+    .attr("transform", (d) => `translate(${d.x}, ${d.y})`)
     .style("fill-opacity", (d) => (d.parent === root ? 1 : 0))
     .style("display", (d) => (d.parent === root ? null : "none"))
     .text((d) => d.name);
