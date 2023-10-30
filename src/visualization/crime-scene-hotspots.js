@@ -140,13 +140,13 @@ d3.json("hotspots.json", (error, root) => {
 
         const proposedLabelArray = proposedLabel.split("");
 
-        d.tw = this.getComputedTextLength();
+        let textWidth = this.getComputedTextLength();
 
         // Add 10 to circle width to account for margins
         const circleWidth = (Math.PI * (k * d.r)) / 2 + 10;
 
         // Based on https://gist.github.com/billdwhite/7207695
-        while (d.tw > circleWidth && proposedLabelArray.length) {
+        while (textWidth > circleWidth && proposedLabelArray.length) {
           // pull out 3 chars at a time to speed things up (one at a time is too slow)
           proposedLabelArray.pop();
           proposedLabelArray.pop();
@@ -157,7 +157,7 @@ d3.json("hotspots.json", (error, root) => {
             proposedLabel = proposedLabelArray.join("") + "..."; // manually truncate with ellipsis
           }
           d3.select(this).text(proposedLabel);
-          d.tw = this.getComputedTextLength();
+          textWidth = this.getComputedTextLength();
         }
       });
   }
