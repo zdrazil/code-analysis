@@ -119,24 +119,23 @@ fi
 # If there are input files (for example) that follow the options, they
 # will remain in the "$@" positional parameters.
 
+# Base paths
 my_dir=$(cd -- "$(dirname -- $(readlink -f "${BASH_SOURCE[0]}"))" &>/dev/null && pwd)
+
+python_bin="${my_dir}/../.direnv/python-3.11/bin/python"
 reports_path="$(pwd)/reports"
-
-repo_log_path="${reports_path}/repo.log"
-
-code_lines_path="${reports_path}/lines.csv"
-revisions_path="${reports_path}/revisions.csv"
-author_entity_effort_path="${reports_path}/author_entity_effort.csv"
-summary_path="${reports_path}/summary.csv"
-
-source "$my_dir/report_paths.sh"
-
 scripts_path="${my_dir}/../scripts"
 
+# Report paths
+author_entity_effort_path="${reports_path}/author_entity_effort.csv"
+code_lines_path="${reports_path}/lines.csv"
+repo_log_path="${reports_path}/repo.log"
+revisions_path="${reports_path}/revisions.csv"
+summary_path="${reports_path}/summary.csv"
 hotspots_path="${reports_path}/hotspots"
 hotspots_json_path="${hotspots_path}/hotspots.json"
 
-python_bin="${my_dir}/../.direnv/python-3.11/bin/python"
+source "$my_dir/report_paths.sh"
 
 generate() {
     mkdir -p "${reports_path}" || exit
@@ -155,15 +154,15 @@ generate() {
 }
 
 inspect() {
-    maat -l "${repo_log_path}" -c git2 -a summary >"${summary_path}" &
-    maat -l "${repo_log_path}" -c git2 -a revisions >"${revisions_path}" &
-    # coupling
-    maat -l "${repo_log_path}" -c git2 -a soc >"${sum_of_coupling_path}" &
-    coupling_command="maat -l ${repo_log_path} -c git2 -a coupling"
-    ${coupling_command} --min-coupling 1 >"${temporal_coupling_path}" &
+    maat_command="maat -l ${repo_log_path} -c git2 -a"
+
+    ${maat_command} summary >"${summary_path}" &
+    ${maat_command} revisions >"${revisions_path}" &
+    ${maat_command} soc >"${sum_of_coupling_path}" &
+    ${maat_command} coupling --min-coupling 1 >"${temporal_coupling_path}" &
 
     # In addition to maat output, add percentages
-    maat -l "${repo_log_path}" -c git2 -a entity-effort | sed '/^entity,/s/$/,percentage/' |
+    ${maat_command} entity-effort | sed '/^entity,/s/$/,percentage/' |
         awk 'BEGIN { FS=OFS="," } { if (NR>1) { percentage = ($3/$4) * 100; $0 = $0 OFS percentage } print }' >"${author_entity_effort_path}" &
 
     wait
