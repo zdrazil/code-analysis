@@ -83,7 +83,7 @@ while :; do
     --before=) # Handle the case of an empty --before=
         die 'ERROR: "--before" requires a non-empty option argument.'
         ;;
-    --column) # Takes an option argument; ensure it has been specified.
+    -c | --column) # Takes an option argument; ensure it has been specified.
         if [[ -n "$2" ]]; then
             column=$2
             shift
