@@ -143,7 +143,7 @@ generate() {
     end=$(echo "${log}" | head -n 1)
     start=$(echo "${log}" | tail -n 1)
 
-    output=$("${python_bin}" "${my_dir}/git-complexity-trend-enhanced.py" \
+    output=$("${python_bin}" "${my_dir}/file-complexity/git_complexity_trend_enhanced.py" \
         --start "${start}" --end "${end}" \
         --file "${file}")
 

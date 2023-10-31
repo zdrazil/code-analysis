@@ -2,3 +2,12 @@ root = true
 
 [Makefile]
 indent_style = tab
+
+[*.md]
+trim_trailing_whitespace = false
+
+[*.{json,css,js, sh}]
+indent_size = 2
+
+[*.{py}]
+indent_size = 4

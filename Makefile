@@ -31,7 +31,7 @@ download_maat:
 		"https://github.com/adamtornhill/code-maat/releases/download/v1.0.4/code-maat-1.0.4-standalone.jar"
 
 install_maat: download_maat
-	cp "$(src_path)/maat.sh" "$(bin_path)/maat"
+	cp "$(src_path)/commands/maat.sh" "$(bin_path)/maat"
 	cp "$(cache_path)/code-maat-1.0.4-standalone.jar" "$(bin_path)/code-maat.jar"
 
 install_wrappers:

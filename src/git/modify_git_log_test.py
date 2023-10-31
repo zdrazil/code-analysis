@@ -1,7 +1,6 @@
 import io
-import sys
 import unittest
-import modify_git_log
+import git.modify_git_log as modify_git_log
 
 
 class TestModifyGitLog(unittest.TestCase):

@@ -77,7 +77,7 @@ fi
 
 my_dir=$(cd -- "$(dirname -- $(readlink -f "${BASH_SOURCE[0]}"))" &>/dev/null && pwd)
 
-source "$my_dir/report_paths.sh"
+source "$my_dir/constants/reports-paths.sh"
 
 filter_reports() {
     report_files=("${complexity_effort_path}" "${sum_of_coupling_path}" "${temporal_coupling_path}")

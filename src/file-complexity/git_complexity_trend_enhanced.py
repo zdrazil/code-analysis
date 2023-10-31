@@ -9,7 +9,7 @@
 import os
 import sys
 
-DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 sys.path.insert(0, DIR + "/scripts/miner")
 
 import argparse
@@ -20,8 +20,8 @@ import git_interactions
 import language_preprocessors
 
 # Get the path of the current directory
-current_directory = os.path.dirname(os.path.realpath(__file__))
-git_follow_show = os.path.join(current_directory, "git-follow-show.sh")
+current_directory = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+git_follow_show = os.path.join(current_directory, "git", "git-follow-show.sh")
 
 
 def calculate_complexity_over_range(file_name, revision_range):

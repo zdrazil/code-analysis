@@ -135,7 +135,7 @@ summary_path="${reports_path}/summary.csv"
 hotspots_path="${reports_path}/hotspots"
 hotspots_json_path="${hotspots_path}/hotspots.json"
 
-source "$my_dir/report_paths.sh"
+source "$my_dir/constants/reports-paths.sh"
 
 generate() {
     mkdir -p "${reports_path}" || exit
@@ -148,7 +148,7 @@ generate() {
         --after="${after}" \
         --before="${before}" \
         -- "${folder}" |
-        "${python_bin}" "${my_dir}/modify_git_log.py" >"${repo_log_path}" || exit
+        "${python_bin}" "${my_dir}/git/modify_git_log.py" >"${repo_log_path}" || exit
 
     cloc "${folder}" --vcs git --by-file --csv --quiet >"${code_lines_path}" || exit
 }
