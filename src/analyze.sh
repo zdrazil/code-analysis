@@ -127,10 +127,12 @@ reports_path="$(pwd)/reports"
 scripts_path="${my_dir}/../scripts"
 
 # Report paths
-author_entity_effort_path="${reports_path}/author_entity_effort.csv"
-code_lines_path="${reports_path}/lines.csv"
-repo_log_path="${reports_path}/repo.log"
-revisions_path="${reports_path}/revisions.csv"
+supporting_files_path="${reports_path}/supporting-files"
+author_entity_effort_path="${reports_path}/author-entity-effort.csv"
+entity_ownership_path="${reports_path}/entity-ownership.csv"
+code_lines_path="${supporting_files_path}/lines.csv"
+repo_log_path="${supporting_files_path}/repo.log"
+revisions_path="${supporting_files_path}/revisions.csv"
 summary_path="${reports_path}/summary.csv"
 hotspots_path="${reports_path}/hotspots"
 hotspots_json_path="${hotspots_path}/hotspots.json"
@@ -138,7 +140,7 @@ hotspots_json_path="${hotspots_path}/hotspots.json"
 source "$my_dir/constants/reports-paths.sh"
 
 generate() {
-    mkdir -p "${reports_path}" || exit
+    mkdir -p "${supporting_files_path}" || exit
 
     git log \
         --follow \
@@ -159,6 +161,7 @@ inspect() {
     ${maat_command} summary >"${summary_path}" &
     ${maat_command} revisions >"${revisions_path}" &
     ${maat_command} soc >"${sum_of_coupling_path}" &
+    ${maat_command} entity-ownership >"${entity_ownership_path}" &
     ${maat_command} coupling --min-coupling 1 >"${temporal_coupling_path}" &
 
     # In addition to maat output, add percentages
@@ -171,7 +174,7 @@ inspect() {
         "${revisions_path}" \
         "${code_lines_path}" >"${complexity_effort_path}" || exit
 
-    mkdir p "$hotspots_path"
+    mkdir -p "$hotspots_path"
 
     "${python_bin}" "${scripts_path}/transform/csv_as_enclosure_json.py" \
         --structure "${code_lines_path}" \
