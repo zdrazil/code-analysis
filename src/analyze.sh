@@ -162,7 +162,7 @@ inspect() {
     ${coupling_command} --min-coupling 1 >"${temporal_coupling_path}" &
 
     # In addition to maat output, add percentages
-    maat -l "${repo_log_path}" -c git2 -a entity-effort | sed '/^entity,/s/$/,percent/' |
+    maat -l "${repo_log_path}" -c git2 -a entity-effort | sed '/^entity,/s/$/,percentage/' |
         awk 'BEGIN { FS=OFS="," } { if (NR>1) { percentage = ($3/$4) * 100; $0 = $0 OFS percentage } print }' >"${author_entity_effort_path}" &
 
     wait
