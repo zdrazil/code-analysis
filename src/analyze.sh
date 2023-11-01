@@ -30,6 +30,9 @@ Reading Your Code as a Crime Scene is highly recommended to understand the repor
                          Reports in the "reports" are not affected by this.
                          They will always have all the rows.
                          Defaults to 10.
+
+    -a, --all            Output all reports, not just the main ones. Main ones 
+                         are the ones I am using.
 EOF
 }
 
@@ -43,6 +46,7 @@ die() {
 after="6 months"
 before="tomorrow"
 rows="10"
+report_all=0
 
 while :; do
     case $1 in
@@ -92,6 +96,9 @@ while :; do
     --rows=) # Handle the case of an empty --rows=
         die 'ERROR: "--after" requires a non-empty option argument.'
         ;;
+    -a | --all)
+        report_all=$((report_all + 1))
+        ;;
     --) # End of all options.
         shift
         break
@@ -124,22 +131,26 @@ my_dir=$(cd -- "$(dirname -- $(readlink -f "${BASH_SOURCE[0]}"))" &>/dev/null &&
 
 python_bin="${my_dir}/../.direnv/python-3.11/bin/python"
 reports_path="$(pwd)/reports"
+supporting_files_path="${reports_path}/supporting-files"
 scripts_path="${my_dir}/../scripts"
 
 # Report paths
-supporting_files_path="${reports_path}/supporting-files"
 author_entity_effort_path="${reports_path}/author-entity-effort.csv"
 entity_ownership_path="${reports_path}/entity-ownership.csv"
-code_lines_path="${supporting_files_path}/lines.csv"
-repo_log_path="${supporting_files_path}/repo.log"
-revisions_path="${supporting_files_path}/revisions.csv"
 summary_path="${reports_path}/summary.csv"
+
+# Hotspots
 hotspots_path="${reports_path}/hotspots"
 hotspots_json_path="${hotspots_path}/hotspots.json"
 
+# Supporting files
+code_lines_path="${supporting_files_path}/lines.csv"
+repo_log_path="${supporting_files_path}/repo.log"
+revisions_path="${supporting_files_path}/revisions.csv"
+
 source "$my_dir/constants/reports-paths.sh"
 
-generate() {
+generate_supporting_files() {
     mkdir -p "${supporting_files_path}" || exit
 
     git log \
@@ -155,9 +166,23 @@ generate() {
     cloc "${folder}" --vcs git --by-file --csv --quiet >"${code_lines_path}" || exit
 }
 
-inspect() {
-    maat_command="maat -l ${repo_log_path} -c git2 -a"
+maat_command="maat -l ${repo_log_path} -c git2 -a"
 
+# Reports that I currently don't have a use for.
+generate_other_reports() {
+    other_reports_path="${reports_path}/other-reports"
+
+    mkdir -p "${other_reports_path}" || exit
+
+    other_reports=(fragmentation main-dev main-dev-by-revs refactoring-main-dev)
+
+    for other_report in "${other_reports[@]}"; do
+        ${maat_command} \
+            "$other_report" >"$other_reports_path/${other_report}.csv" &
+    done
+}
+
+inspect() {
     ${maat_command} summary >"${summary_path}" &
     ${maat_command} revisions >"${revisions_path}" &
     ${maat_command} soc >"${sum_of_coupling_path}" &
@@ -215,8 +240,13 @@ copy_hotspots() {
     done
 }
 
-generate &&
-    inspect &&
+generate_supporting_files || exit
+
+if [ "$report_all" -ne 0 ]; then
+    generate_other_reports &
+fi
+
+inspect &&
     cleanup_reports &&
     output_reports &&
     copy_hotspots &&
