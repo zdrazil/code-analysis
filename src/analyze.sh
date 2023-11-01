@@ -206,7 +206,7 @@ output_reports() {
 }
 
 copy_hotspots() {
-    hotspots_files=(crime-scene-hotspots.css crime-scene-hotspots.html crime-scene-hotspots.js d3)
+    hotspots_files=(crime-scene-hotspots.css crime-scene-hotspots.html crime-scene-hotspots.js LICENSE d3)
 
     mkdir -p "$hotspots_path"
 

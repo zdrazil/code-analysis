@@ -98,7 +98,7 @@ You can also visualize these hotspots with a [zoomable circle-packing algorithm]
 
 ### maat-analyze-complexity-trend
 
-After you find a hotspot that you are interested in, you can use the `maat-analyze-complexity-trend` command to analyze file’s complexity trend. Is the complexity increasing, decreasing, or staying the same? What can you do to make it better?
+After you find a hotspot that you’re interested in, you can use the `maat-analyze-complexity-trend` command to analyze file’s complexity trend. Is the complexity increasing, decreasing, or staying the same? What can you do to make it better?
 
 The command also shows commit hashes along with a row number. Use the row number to find the corresponding commit hash and then run `git show <commit hash>` to examine the changes made in that commit that increased the complexity.
 
