@@ -76,9 +76,16 @@ To prepare the reports, run these in you repository first:
 
 This report combines the level of churn (number of revisions) and the level of complexity (lines of code) to determine which modules are the “hottest”, that’s why I’ll be calling them hotspots from now on.
 
+| module                                        | revisions | code |
+| --------------------------------------------- | --------- | ---- |
+| persister/entity/AbstractEntityPersister.java | 132       | 5289 |
+| query/sqm/sql/BaseSqmToSqlAstConverter.java   | 120       | 7323 |
+
 Hotspots report helps you pinpoint the modules where you spend most of your development time.
 
-You can also visualize these hotspots with a zoomable circle-packing algorithm. This visualization is available at <http://localhost:8888/crime-scene-hotspots.html>. In this visualization, the size of each circle represents the complexity of the module measured by lines of code. The color intensity of each circle reflects the amount of effort measured by number of revisions. By looking at the visual representation, you may notice clusters of hotspots, which could suggest that entire components or packages are going through significant changes.
+You can also visualize these hotspots with a [zoomable circle-packing algorithm]([circle-packing algorithm](https://observablehq.com/@d3/pack-component)). This visualization is available at <http://localhost:8888/crime-scene-hotspots.html>. In this visualization, the size of each circle represents the complexity of the module measured by lines of code. The color intensity of each circle reflects the amount of effort measured by number of revisions. By looking at the visual representation, you may notice clusters of hotspots, which could suggest that entire components or packages are going through significant changes.
+
+![Example of hotspot analysis](https://vladimirzdrazil.com/media/hotspots-circle-packing.jpg "Example of hotspot analysis")
 
 #### What can you use it for:
 
@@ -95,7 +102,38 @@ After you find a hotspot that you are interested in, you can use the `maat-analy
 
 The command also shows commit hashes along with a row number. Use the row number to find the corresponding commit hash and then run `git show <commit hash>` to examine the changes made in that commit that increased the complexity.
 
-The complexity is measured by analyzing the whitespace that is used for indentation.
+The complexity is measured by analyzing the whitespace used for indentation. The unit is the number of whitespace characters.
+
+```
+0    rev         n     total     mean  sd
+1    6ef9b03f8b  7003  23306.25  3.33  2.14
+2    67d751d81d  6959  22916.25  3.29  2.1
+```
+
+<dl>
+  <dt>rev</dt>
+  <dd>commit</dd>
+  <dt>n</dt>
+  <dd>number of lines</dd>
+  <dt>total</dt>
+  <dd>total complexity per file</dd>
+  <dt>mean</dt>
+  <dd>average mean per file</dd>
+  <dt>sd</dt>
+  <dd>
+    <p
+      >Standard deviation. The number tells you the average complexity of lines
+      in comparison to the mean.</p
+    >
+    <p
+      >In the example for row 1, the average mean is 3.33. A standard deviation
+      of 2.14 means that for 68% of lines in the file, the complexity will fall
+      within the range of 3.33 - 2.14 and 3.33 + 2.14.</p
+    >
+  </dd>
+</dl>
+
+![Complexity trend](https://vladimirzdrazil.com/media/maat-complexity-trend.jpg "Complexity trend")
 
 ### sum-of-coupling.csv and temporal-coupling.csv
 

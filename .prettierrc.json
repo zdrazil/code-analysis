@@ -1,4 +1,5 @@
 {
   "htmlWhitespaceSensitivity": "strict",
+  "proseWrap": "never",
   "trailingComma": "all"
 }
