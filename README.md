@@ -83,7 +83,7 @@ This report combines the level of churn (number of revisions) and the level of c
 
 Hotspots report helps you pinpoint the modules where you spend most of your development time.
 
-You can also visualize these hotspots with a [zoomable circle-packing algorithm]([circle-packing algorithm](https://observablehq.com/@d3/pack-component)). This visualization is available at <http://localhost:8888/crime-scene-hotspots.html>. In this visualization, the size of each circle represents the complexity of the module measured by lines of code. The color intensity of each circle reflects the amount of effort measured by number of revisions. By looking at the visual representation, you may notice clusters of hotspots, which could suggest that entire components or packages are going through significant changes.
+You can also visualize these hotspots with a [zoomable circle-packing algorithm](https://observablehq.com/@d3/pack-component). This visualization is available at <http://localhost:8888/crime-scene-hotspots.html>. In this visualization, the size of each circle represents the complexity of the module measured by lines of code. The color intensity of each circle reflects the amount of effort measured by number of revisions. By looking at the visual representation, you may notice clusters of hotspots, which could suggest that entire components or packages are going through significant changes.
 
 ![Example of hotspot analysis](https://vladimirzdrazil.com/media/hotspots-circle-packing.jpg "Example of hotspot analysis")
 
@@ -98,7 +98,7 @@ You can also visualize these hotspots with a [zoomable circle-packing algorithm]
 
 ### maat-analyze-complexity-trend
 
-After you find a hotspot that you are interested in, you can use the `maat-analyze-complexity-trend` command to analyze its complexity trends. Is the complexity increasing, decreasing, or staying the same? What can you do to make it better?
+After you find a hotspot that you are interested in, you can use the `maat-analyze-complexity-trend` command to analyze file’s complexity trend. Is the complexity increasing, decreasing, or staying the same? What can you do to make it better?
 
 The command also shows commit hashes along with a row number. Use the row number to find the corresponding commit hash and then run `git show <commit hash>` to examine the changes made in that commit that increased the complexity.
 
@@ -126,7 +126,7 @@ The complexity is measured by analyzing the whitespace used for indentation. The
       in comparison to the mean.</p
     >
     <p
-      >In the example for row 1, the average mean is 3.33. A standard deviation
+      >In the example, for row 1 the average mean is 3.33. A standard deviation
       of 2.14 means that for 68% of lines in the file, the complexity will fall
       within the range of 3.33 - 2.14 and 3.33 + 2.14.</p
     >
