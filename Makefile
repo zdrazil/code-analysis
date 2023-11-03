@@ -15,7 +15,7 @@ clone_scripts:
 	test -d $(scripts_path) || git clone \
 		--depth=1 \
 		--branch=python3 \
-		git@github.com:adamtornhill/maat-scripts.git \
+		'https://github.com/adamtornhill/code-maat.git' \
 		"$(scripts_path)" \
 	&& rm -rf "$(scripts_path)/.git" \
 	&& rm -rf "$(scripts_path)/.github"
