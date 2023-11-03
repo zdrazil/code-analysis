@@ -1,6 +1,7 @@
+__pycache__
 .direnv
+.venv
+cache/
 generated/
 scripts/
-cache/
-__pycache__
 src/visualization/hotspots.json

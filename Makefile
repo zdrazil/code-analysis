@@ -8,7 +8,8 @@ all: build
 install: build install_wrappers install_maat
 
 build: clone_scripts download_maat
-	pip install -r $(scripts_path)/requirements.txt
+	python3 -m venv .venv
+	.venv/bin/pip install -r $(scripts_path)/requirements.txt
 
 clone_scripts:
 	echo "$(scripts_path)"
@@ -49,3 +50,4 @@ uninstall:
 clean:
 	rm -r "$(cache_path)" || true
 	rm -r "$(scripts_path)" || true
+	rm -r .venv || true

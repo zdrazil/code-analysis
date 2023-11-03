@@ -151,7 +151,7 @@ revisions_path="${supporting_files_path}/revisions.csv"
 source "$my_dir/constants/reports-paths.sh"
 
 run_python() {
-    "${my_dir}/../.direnv/python-3.11/bin/python" "$@"
+    "${my_dir}/../.venv/bin/python" "$@"
 }
 
 maat_analysis() {

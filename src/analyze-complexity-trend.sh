@@ -128,7 +128,7 @@ fi
 # will remain in the "$@" positional parameters.
 
 run_python() {
-    "${my_dir}/../.direnv/python-3.11/bin/python" "$@"
+    "${my_dir}/../.venv/bin/python" "$@"
 }
 
 run_complexity_trend() {

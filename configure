@@ -2,7 +2,6 @@
 
 dependencies=(
     cloc
-    direnv
     java
     git
     python3
@@ -30,5 +29,7 @@ fi
 
 if ! echo "$PATH" | grep -q "$HOME/bin"; then
     echo "Error: \$HOME/bin is not in your \$PATH" >&2
+    echo "If you need a help with that, here's a helpful guide:" >&2
+    echo "https://www.digitalocean.com/community/tutorials/how-to-view-and-update-the-linux-path-environment-variable#step-3-mdash-permanently-adding-a-directory-to-the-path-variable" >&2
     exit 1
 fi
