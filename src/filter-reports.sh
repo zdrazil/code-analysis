@@ -79,6 +79,13 @@ my_dir=$(cd -- "$(dirname -- $(readlink -f "${BASH_SOURCE[0]}"))" &>/dev/null &&
 
 source "$my_dir/constants/reports-paths.sh"
 
+get_filtered_file_path() {
+    local file=$1
+    local extension="${file##*.}"
+    local filename="${file%.*}"
+    echo "${filename}-filtered.${extension}"
+}
+
 filter_reports() {
     report_files=("${complexity_effort_path}" "${sum_of_coupling_path}" "${temporal_coupling_path}")
 
@@ -87,9 +94,7 @@ filter_reports() {
     echo
 
     for report_file in "${report_files[@]}"; do
-        extension="${report_file##*.}"
-        report_filename="${report_file%.*}"
-        filtered_file="${report_filename}_filtered.${extension}"
+        filtered_file=$(get_filtered_file_path "$report_file")
 
         head -n 1 "$report_file" >"$filtered_file"
         grep -F "${filter}" "$report_file" >>"$filtered_file"
