@@ -87,10 +87,10 @@ get_filtered_file_path() {
 }
 
 filter_reports() {
-    report_files=("${complexity_effort_path}" "${sum_of_coupling_path}" "${temporal_coupling_path}")
+    report_files=("$complexity_effort_path" "$sum_of_coupling_path" "$temporal_coupling_path")
 
-    echo "Displaying the first ${rows} results in each report."
-    echo "Full reports are in ${reports_path} "
+    echo "Displaying the first $rows results in each report."
+    echo "Full reports are in $reports_path "
     echo
 
     for report_file in "${report_files[@]}"; do

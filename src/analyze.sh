@@ -115,7 +115,7 @@ done
 
 folder=$*
 
-if [[ -z "${folder}" ]]; then
+if [[ -z "$folder" ]]; then
     folder="."
 fi
 
@@ -155,11 +155,11 @@ run_python() {
 }
 
 maat_analysis() {
-    maat -l "${repo_log_path}" -c git2 -a "$@"
+    maat -l "$repo_log_path" -c git2 -a "$@"
 }
 
 generate_supporting_files() {
-    mkdir -p "${supporting_files_path}" || exit
+    mkdir -p "$supporting_files_path" || exit
 
     git log \
         --follow \
@@ -169,22 +169,22 @@ generate_supporting_files() {
         --after="${after}" \
         --before="${before}" \
         -- "${folder}" |
-        run_python "${my_dir}/git/modify_git_log.py" >"${repo_log_path}" || exit
+        run_python "${my_dir}/git/modify_git_log.py" >"$repo_log_path" || exit
 
-    cloc "${folder}" --vcs git --by-file --csv --quiet >"${code_lines_path}" || exit
+    cloc "${folder}" --vcs git --by-file --csv --quiet >"$code_lines_path" || exit
 }
 
 # Reports that I currently don't have a use for.
 generate_other_reports() {
     local other_reports_path="${reports_path}/other-reports"
 
-    mkdir -p "${other_reports_path}" || exit
+    mkdir -p "$other_reports_path" || exit
 
     local other_reports=(fragmentation main-dev main-dev-by-revs refactoring-main-dev)
 
     for other_report in "${other_reports[@]}"; do
         maat_analysis \
-            "$other_report" >"$other_reports_path/${other_report}.csv" &
+            "$other_report" >"${other_reports_path}/${other_report}.csv" &
     done
 }
 
@@ -198,36 +198,36 @@ maat_analysis_entity_effort() {
                     $0 = $0 OFS percentage 
                 } 
                 print 
-            }' >"${author_entity_effort_path}" &
+            }' >"$author_entity_effort_path" &
 }
 
 analyze() {
-    maat_analysis summary >"${summary_path}" &
-    maat_analysis revisions >"${revisions_path}" &
-    maat_analysis soc >"${sum_of_coupling_path}" &
-    maat_analysis entity-ownership >"${entity_ownership_path}" &
-    maat_analysis coupling --min-coupling 1 >"${temporal_coupling_path}" &
+    maat_analysis summary >"$summary_path" &
+    maat_analysis revisions >"$revisions_path" &
+    maat_analysis soc >"$sum_of_coupling_path" &
+    maat_analysis entity-ownership >"$entity_ownership_path" &
+    maat_analysis coupling --min-coupling 1 >"$temporal_coupling_path" &
 
     maat_analysis_entity_effort
 
     wait
 
     run_python "${scripts_path}/merge/merge_comp_freqs.py" \
-        "${revisions_path}" \
-        "${code_lines_path}" >"${complexity_effort_path}" || exit
+        "$revisions_path" \
+        "$code_lines_path" >"$complexity_effort_path" || exit
 
     mkdir -p "$hotspots_path"
 
     run_python "${scripts_path}/transform/csv_as_enclosure_json.py" \
-        --structure "${code_lines_path}" \
-        --weights "${complexity_effort_path}" >"${hotspots_json_path}" || exit
+        --structure "$code_lines_path" \
+        --weights "$complexity_effort_path" >"$hotspots_json_path" || exit
 }
 
 cleanup_reports() {
     local report_files=(
-        "${complexity_effort_path}"
-        "${sum_of_coupling_path}"
-        "${temporal_coupling_path}"
+        "$complexity_effort_path"
+        "$sum_of_coupling_path"
+        "$temporal_coupling_path"
     )
 
     if [[ "$folder" != "." ]]; then
@@ -238,7 +238,7 @@ cleanup_reports() {
 }
 
 output_reports() {
-    echo "Displaying the first" "${rows}" "results in each report."
+    echo "Displaying the first" "$rows" "results in each report."
     echo "Full reports are in ${reports_path}"
     echo
 
@@ -257,13 +257,13 @@ copy_hotspots() {
     mkdir -p "$hotspots_path"
 
     for hotspots_file in "${hotspots_files[@]}"; do
-        cp -R "$my_dir/visualization/$hotspots_file" "$hotspots_path"
+        cp -R "${my_dir}/visualization/${hotspots_file}" "$hotspots_path"
     done
 }
 
 generate_supporting_files || exit
 
-if [ "$report_all" -ne 0 ]; then
+if [[ "$report_all" -ne 0 ]]; then
     generate_other_reports &
 fi
 

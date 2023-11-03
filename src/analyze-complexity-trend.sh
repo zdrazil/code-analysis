@@ -116,7 +116,7 @@ my_dir=$(cd -- "$(dirname -- $(readlink -f "${BASH_SOURCE[0]}"))" &>/dev/null &&
 
 file=$*
 
-if [[ -z "${file}" ]]; then
+if [[ -z "$file" ]]; then
     die 'ERROR: file path not provided.'
 fi
 
@@ -145,8 +145,8 @@ run_complexity_trend() {
     start=$(echo "${log}" | tail -n 1)
 
     run_python "${my_dir}/file-complexity/git_complexity_trend_enhanced.py" \
-        --start "${start}" --end "${end}" \
-        --file "${file}"
+        --start "$start" --end "${end}" \
+        --file "$file"
 }
 
 get_column_number() {
@@ -177,7 +177,7 @@ generate() {
 
     column_number=$(get_column_number "$trend" "$column")
 
-    if [[ -z "${column_number}" ]]; then
+    if [[ -z "$column_number" ]]; then
         die "ERROR: the column name $column is invalid. Supported names are n, sd, total and mean."
     fi
 
@@ -185,7 +185,7 @@ generate() {
 
     run_python "${scripts_path}/plot/plot.py" \
         --file <(echo "${trend}") \
-        --column "${column_number}"
+        --column "$column_number"
 }
 
 generate
