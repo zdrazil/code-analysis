@@ -129,12 +129,6 @@ fi
 # Base paths
 # shellcheck disable=SC2046
 my_dir=$(cd -- "$(dirname -- $(readlink -f "${BASH_SOURCE[0]}"))" &>/dev/null && pwd)
-current_dir=$(pwd)
-
-cd "$my_dir" || exit
-# load correct python
-eval "$(direnv export bash)"
-cd "$current_dir" || exit
 
 reports_path="$(pwd)/reports"
 supporting_files_path="${reports_path}/supporting-files"
@@ -156,6 +150,10 @@ revisions_path="${supporting_files_path}/revisions.csv"
 
 source "$my_dir/constants/reports-paths.sh"
 
+run_python() {
+    "${my_dir}/../.direnv/python-3.11/bin/python" "$@"
+}
+
 maat_analysis() {
     maat -l "$repo_log_path" -c git2 -a "$@"
 }
@@ -171,7 +169,7 @@ generate_supporting_files() {
         --after="${after}" \
         --before="${before}" \
         -- "${folder}" |
-        python "${my_dir}/git/modify_git_log.py" >"$repo_log_path" || exit
+        run_python "${my_dir}/git/modify_git_log.py" >"$repo_log_path" || exit
 
     cloc "${folder}" --vcs git --by-file --csv --quiet >"$code_lines_path" || exit
 }
@@ -214,13 +212,13 @@ analyze() {
 
     wait
 
-    python "${scripts_path}/merge/merge_comp_freqs.py" \
+    run_python "${scripts_path}/merge/merge_comp_freqs.py" \
         "$revisions_path" \
         "$code_lines_path" >"$complexity_effort_path" || exit
 
     mkdir -p "$hotspots_path"
 
-    python "${scripts_path}/transform/csv_as_enclosure_json.py" \
+    run_python "${scripts_path}/transform/csv_as_enclosure_json.py" \
         --structure "$code_lines_path" \
         --weights "$complexity_effort_path" >"$hotspots_json_path" || exit
 }
@@ -275,4 +273,4 @@ analyze &&
     copy_hotspots &&
     cd "${reports_path}/hotspots" &&
     echo "Running on http://localhost:8888/crime-scene-hotspots.html" &&
-    python -m http.server 8888
+    run_python -m http.server 8888
