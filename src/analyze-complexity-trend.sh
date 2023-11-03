@@ -127,11 +127,11 @@ fi
 # If there are input files (for example) that follow the options, they
 # will remain in the "$@" positional parameters.
 
-scripts_path="${my_dir}/../scripts"
+run_python() {
+    "${my_dir}/../.direnv/python-3.11/bin/python" "$@"
+}
 
-python_bin="${my_dir}/../.direnv/python-3.11/bin/python"
-
-generate() {
+run_complexity_trend() {
     log=$(
         git log --follow \
             --pretty=format:"%h" \
@@ -144,20 +144,47 @@ generate() {
     end=$(echo "${log}" | head -n 1)
     start=$(echo "${log}" | tail -n 1)
 
-    output=$("${python_bin}" "${my_dir}/file-complexity/git_complexity_trend_enhanced.py" \
+    run_python "${my_dir}/file-complexity/git_complexity_trend_enhanced.py" \
         --start "${start}" --end "${end}" \
-        --file "${file}")
+        --file "${file}"
+}
 
-    echo "$output" | nl -v 0 -w2 | tr ',' '\t' | column -t
+get_column_number() {
+    local trend=$1
+    local column=$2
 
-    column_number=$(head -n 1 <(echo "$output") | tr ',' '\t' | awk -v b="$column" '{for (i=1;i<=NF;i++) { if ($i == b) { print i-1 } }}')
+    echo "$trend" |
+        head -n 1 |
+        tr ',' '\t' |
+        awk -v b="$column" '{
+            for (i = 1; i <= NF; i++) { 
+                if ($i == b) { 
+                    print i - 1 
+                } 
+            }
+        }'
+}
+
+output_trend() {
+    local trend=$1
+    echo "$1" | nl -v 0 -w2 | tr ',' '\t' | column -t
+}
+
+generate() {
+    trend=$(run_complexity_trend)
+
+    output_trend "$trend"
+
+    column_number=$(get_column_number "$trend" "$column")
 
     if [[ -z "${column_number}" ]]; then
         die "ERROR: the column name $column is invalid. Supported names are n, sd, total and mean."
     fi
 
-    "${python_bin}" "${scripts_path}/plot/plot.py" \
-        --file <(echo "${output}") \
+    local scripts_path="${my_dir}/../scripts"
+
+    run_python "${scripts_path}/plot/plot.py" \
+        --file <(echo "${trend}") \
         --column "${column_number}"
 }
 
