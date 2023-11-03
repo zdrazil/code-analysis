@@ -127,6 +127,7 @@ fi
 # will remain in the "$@" positional parameters.
 
 # Base paths
+# shellcheck disable=SC2046
 my_dir=$(cd -- "$(dirname -- $(readlink -f "${BASH_SOURCE[0]}"))" &>/dev/null && pwd)
 
 python_bin="${my_dir}/../.direnv/python-3.11/bin/python"

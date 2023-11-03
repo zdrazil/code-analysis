@@ -74,7 +74,7 @@ fi
 # Rest of the program here.
 # If there are input files (for example) that follow the options, they
 # will remain in the "$@" positional parameters.
-
+# shellcheck disable=SC2046
 my_dir=$(cd -- "$(dirname -- $(readlink -f "${BASH_SOURCE[0]}"))" &>/dev/null && pwd)
 
 source "$my_dir/constants/reports-paths.sh"
