@@ -113,6 +113,12 @@ done
 
 # shellcheck disable=SC2046
 my_dir=$(cd -- "$(dirname -- $(readlink -f "${BASH_SOURCE[0]}"))" &>/dev/null && pwd)
+current_dir=$(pwd)
+
+cd "$my_dir" || exit
+# load correct python
+eval "$(direnv export bash)"
+cd "$current_dir" || exit
 
 file=$*
 
@@ -127,10 +133,6 @@ fi
 # If there are input files (for example) that follow the options, they
 # will remain in the "$@" positional parameters.
 
-run_python() {
-    "${my_dir}/../.direnv/python-3.11/bin/python" "$@"
-}
-
 run_complexity_trend() {
     log=$(
         git log --follow \
@@ -144,7 +146,7 @@ run_complexity_trend() {
     end=$(echo "${log}" | head -n 1)
     start=$(echo "${log}" | tail -n 1)
 
-    run_python "${my_dir}/file-complexity/git_complexity_trend_enhanced.py" \
+    python "${my_dir}/file-complexity/git_complexity_trend_enhanced.py" \
         --start "$start" --end "${end}" \
         --file "$file"
 }
@@ -183,7 +185,7 @@ generate() {
 
     local scripts_path="${my_dir}/../scripts"
 
-    run_python "${scripts_path}/plot/plot.py" \
+    python "${scripts_path}/plot/plot.py" \
         --file <(echo "${trend}") \
         --column "$column_number"
 }
