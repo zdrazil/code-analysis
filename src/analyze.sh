@@ -130,7 +130,6 @@ fi
 # shellcheck disable=SC2046
 my_dir=$(cd -- "$(dirname -- $(readlink -f "${BASH_SOURCE[0]}"))" &>/dev/null && pwd)
 
-python_bin="${my_dir}/../.direnv/python-3.11/bin/python"
 reports_path="$(pwd)/reports"
 supporting_files_path="${reports_path}/supporting-files"
 scripts_path="${my_dir}/../scripts"
@@ -151,6 +150,14 @@ revisions_path="${supporting_files_path}/revisions.csv"
 
 source "$my_dir/constants/reports-paths.sh"
 
+run_python() {
+    "${my_dir}/../.direnv/python-3.11/bin/python" "$@"
+}
+
+maat_analysis() {
+    maat -l "${repo_log_path}" -c git2 -a "$@"
+}
+
 generate_supporting_files() {
     mkdir -p "${supporting_files_path}" || exit
 
@@ -162,53 +169,66 @@ generate_supporting_files() {
         --after="${after}" \
         --before="${before}" \
         -- "${folder}" |
-        "${python_bin}" "${my_dir}/git/modify_git_log.py" >"${repo_log_path}" || exit
+        run_python "${my_dir}/git/modify_git_log.py" >"${repo_log_path}" || exit
 
     cloc "${folder}" --vcs git --by-file --csv --quiet >"${code_lines_path}" || exit
 }
 
-maat_command="maat -l ${repo_log_path} -c git2 -a"
-
 # Reports that I currently don't have a use for.
 generate_other_reports() {
-    other_reports_path="${reports_path}/other-reports"
+    local other_reports_path="${reports_path}/other-reports"
 
     mkdir -p "${other_reports_path}" || exit
 
-    other_reports=(fragmentation main-dev main-dev-by-revs refactoring-main-dev)
+    local other_reports=(fragmentation main-dev main-dev-by-revs refactoring-main-dev)
 
     for other_report in "${other_reports[@]}"; do
-        ${maat_command} \
+        maat_analysis \
             "$other_report" >"$other_reports_path/${other_report}.csv" &
     done
 }
 
-inspect() {
-    ${maat_command} summary >"${summary_path}" &
-    ${maat_command} revisions >"${revisions_path}" &
-    ${maat_command} soc >"${sum_of_coupling_path}" &
-    ${maat_command} entity-ownership >"${entity_ownership_path}" &
-    ${maat_command} coupling --min-coupling 1 >"${temporal_coupling_path}" &
-
+maat_analysis_entity_effort() {
     # In addition to maat output, add percentages
-    ${maat_command} entity-effort | sed '/^entity,/s/$/,percentage/' |
-        awk 'BEGIN { FS=OFS="," } { if (NR>1) { percentage = ($3/$4) * 100; $0 = $0 OFS percentage } print }' >"${author_entity_effort_path}" &
+    maat_analysis entity-effort |
+        sed '/^entity,/s/$/,percentage/' |
+        awk 'BEGIN { FS=OFS="," } { 
+                if (NR > 1) { 
+                    percentage = ($3 / $4) * 100; 
+                    $0 = $0 OFS percentage 
+                } 
+                print 
+            }' >"${author_entity_effort_path}" &
+}
+
+analyze() {
+    maat_analysis summary >"${summary_path}" &
+    maat_analysis revisions >"${revisions_path}" &
+    maat_analysis soc >"${sum_of_coupling_path}" &
+    maat_analysis entity-ownership >"${entity_ownership_path}" &
+    maat_analysis coupling --min-coupling 1 >"${temporal_coupling_path}" &
+
+    maat_analysis_entity_effort
 
     wait
 
-    "${python_bin}" "${scripts_path}/merge/merge_comp_freqs.py" \
+    run_python "${scripts_path}/merge/merge_comp_freqs.py" \
         "${revisions_path}" \
         "${code_lines_path}" >"${complexity_effort_path}" || exit
 
     mkdir -p "$hotspots_path"
 
-    "${python_bin}" "${scripts_path}/transform/csv_as_enclosure_json.py" \
+    run_python "${scripts_path}/transform/csv_as_enclosure_json.py" \
         --structure "${code_lines_path}" \
         --weights "${complexity_effort_path}" >"${hotspots_json_path}" || exit
 }
 
 cleanup_reports() {
-    report_files=("${complexity_effort_path}" "${sum_of_coupling_path}" "${temporal_coupling_path}")
+    local report_files=(
+        "${complexity_effort_path}"
+        "${sum_of_coupling_path}"
+        "${temporal_coupling_path}"
+    )
 
     if [[ "$folder" != "." ]]; then
         for report_file in "${report_files[@]}"; do
@@ -222,7 +242,7 @@ output_reports() {
     echo "Full reports are in ${reports_path}"
     echo
 
-    report_files=("${summary_path}" "${complexity_effort_path}" "${sum_of_coupling_path}" "${temporal_coupling_path}")
+    local report_files=("${summary_path}" "${complexity_effort_path}" "${sum_of_coupling_path}" "${temporal_coupling_path}")
 
     for report_file in "${report_files[@]}"; do
         echo reports/"$(basename "$report_file")"
@@ -247,10 +267,10 @@ if [ "$report_all" -ne 0 ]; then
     generate_other_reports &
 fi
 
-inspect &&
+analyze &&
     cleanup_reports &&
     output_reports &&
     copy_hotspots &&
     cd "${reports_path}/hotspots" &&
     echo "Running on http://localhost:8888/crime-scene-hotspots.html" &&
-    "${python_bin}" -m http.server 8888
+    run_python -m http.server 8888
