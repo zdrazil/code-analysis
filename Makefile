@@ -52,6 +52,9 @@ clean:
 	rm -r "$(scripts_path)" || true
 	rm -r .venv || true
 
+dev:
+	npm install
+
 format:
 	shfmt --simplify --write --indent 4 src
 	prettier --config .prettierrc.json --write .

@@ -3,5 +3,6 @@ __pycache__
 .venv
 cache/
 generated/
+package-lock.json
 scripts/
 src/visualization/hotspots.json
