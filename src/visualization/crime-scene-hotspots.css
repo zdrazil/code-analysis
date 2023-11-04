@@ -19,7 +19,11 @@
 }
 
 .label {
-  font: 14px "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font:
+    14px "Helvetica Neue",
+    Helvetica,
+    Arial,
+    sans-serif;
   text-anchor: middle;
   fill: white;
 }
@@ -33,7 +37,11 @@
   background-color: #ffffe0;
   border-radius: 2px;
   color: #666666;
-  font: 12px "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font:
+    12px "Helvetica Neue",
+    Helvetica,
+    Arial,
+    sans-serif;
   padding: 2px;
   position: absolute;
   visibility: hidden;

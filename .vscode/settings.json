@@ -2,5 +2,6 @@
   "[python]": {
     "editor.defaultFormatter": "ms-python.black-formatter"
   },
-  "python.analysis.extraPaths": ["./scripts/miner"]
+  "python.analysis.extraPaths": ["./scripts/miner"],
+  "shellformat.flag": "-s -i 4"
 }

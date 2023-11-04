@@ -55,7 +55,7 @@ while :; do
         exit
         ;;
     --after) # Takes an option argument; ensure it has been specified.
-        if [[ -n "$2" ]]; then
+        if [[ -n $2 ]]; then
             after=$2
             shift
         else
@@ -69,7 +69,7 @@ while :; do
         die 'ERROR: "--after" requires a non-empty option argument.'
         ;;
     --before) # Takes an option argument; ensure it has been specified.
-        if [[ -n "$2" ]]; then
+        if [[ -n $2 ]]; then
             before=$2
             shift
         else
@@ -83,7 +83,7 @@ while :; do
         die 'ERROR: "--before" requires a non-empty option argument.'
         ;;
     -n | --rows) # Takes an option argument; ensure it has been specified.
-        if [[ -n "$2" ]]; then
+        if [[ -n $2 ]]; then
             rows=$2
             shift
         else
@@ -115,7 +115,7 @@ done
 
 folder=$*
 
-if [[ -z "$folder" ]]; then
+if [[ -z $folder ]]; then
     folder="."
 fi
 
@@ -230,7 +230,7 @@ cleanup_reports() {
         "$temporal_coupling_path"
     )
 
-    if [[ "$folder" != "." ]]; then
+    if [[ $folder != "." ]]; then
         for report_file in "${report_files[@]}"; do
             sed -i '' "s%${folder}%%g" "$report_file"
         done
@@ -263,7 +263,7 @@ copy_hotspots() {
 
 generate_supporting_files || exit
 
-if [[ "$report_all" -ne 0 ]]; then
+if [[ $report_all -ne 0 ]]; then
     generate_other_reports &
 fi
 

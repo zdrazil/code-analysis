@@ -51,3 +51,8 @@ clean:
 	rm -r "$(cache_path)" || true
 	rm -r "$(scripts_path)" || true
 	rm -r .venv || true
+
+format:
+	shfmt --simplify --write --indent 4 src
+	prettier --config .prettierrc.json --write .
+	black src

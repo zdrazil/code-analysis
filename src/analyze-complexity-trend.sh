@@ -56,7 +56,7 @@ while :; do
         exit
         ;;
     --after) # Takes an option argument; ensure it has been specified.
-        if [[ -n "$2" ]]; then
+        if [[ -n $2 ]]; then
             after=$2
             shift
         else
@@ -70,7 +70,7 @@ while :; do
         die 'ERROR: "--after" requires a non-empty option argument.'
         ;;
     --before) # Takes an option argument; ensure it has been specified.
-        if [[ -n "$2" ]]; then
+        if [[ -n $2 ]]; then
             before=$2
             shift
         else
@@ -84,7 +84,7 @@ while :; do
         die 'ERROR: "--before" requires a non-empty option argument.'
         ;;
     -c | --column) # Takes an option argument; ensure it has been specified.
-        if [[ -n "$2" ]]; then
+        if [[ -n $2 ]]; then
             column=$2
             shift
         else
@@ -116,7 +116,7 @@ my_dir=$(cd -- "$(dirname -- $(readlink -f "${BASH_SOURCE[0]}"))" &>/dev/null &&
 
 file=$*
 
-if [[ -z "$file" ]]; then
+if [[ -z $file ]]; then
     die 'ERROR: file path not provided.'
 fi
 
@@ -177,7 +177,7 @@ generate() {
 
     column_number=$(get_column_number "$trend" "$column")
 
-    if [[ -z "$column_number" ]]; then
+    if [[ -z $column_number ]]; then
         die "ERROR: the column name $column is invalid. Supported names are n, sd, total and mean."
     fi
 

@@ -38,7 +38,7 @@ while :; do
         exit
         ;;
     -n | --rows) # Takes an option argument; ensure it has been specified.
-        if [[ -n "$2" ]]; then
+        if [[ -n $2 ]]; then
             rows=$2
             shift
         else
@@ -67,7 +67,7 @@ done
 
 filter=$*
 
-if [[ -z "${filter}" ]]; then
+if [[ -z ${filter} ]]; then
     filter="."
 fi
 
