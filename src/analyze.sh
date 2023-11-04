@@ -138,6 +138,7 @@ my_dir=$(cd -- "$(dirname -- $(readlink -f "${BASH_SOURCE[0]}"))" &>/dev/null &&
 
 reports_path="$(pwd)/reports"
 supporting_files_path="${reports_path}/supporting-files"
+scripts_path="${my_dir}/../scripts"
 
 # Hotspots
 hotspots_path="${reports_path}/hotspots"
@@ -158,54 +159,10 @@ maat_analysis() {
     maat -l "$repo_log_path" -c git2 -a "$@"
 }
 
-generate_supporting_files() {
-    mkdir -p "$supporting_files_path" || exit
-
-    git log \
-        --follow \
-        --numstat \
-        --date=short \
-        --pretty=format:'--%h--%ad--%aN' \
-        --after="${after}" \
-        --before="${before}" \
-        -- "${folder}" |
-        run_python "${my_dir}/git/modify_git_log.py" >"$repo_log_path" || exit
-
-}
-
-# Reports that I currently don't have a use for.
-generate_other_reports() {
-    local other_reports_path="${reports_path}/other-reports"
-
-    mkdir -p "$other_reports_path" || exit
-
-    local other_reports=(fragmentation main-dev main-dev-by-revs refactoring-main-dev)
-
-    for other_report in "${other_reports[@]}"; do
-        maat_analysis \
-            "$other_report" >"${other_reports_path}/${other_report}.csv" &
-    done
-}
-
-maat_analysis_entity_effort() {
-    # In addition to maat output, add percentages
-    maat_analysis entity-effort |
-        sed '/^entity,/s/$/,percentage/' |
-        awk 'BEGIN { FS=OFS="," } { 
-                if (NR > 1) { 
-                    percentage = ($3 / $4) * 100; 
-                    $0 = $0 OFS percentage 
-                } 
-                print 
-            }'
-}
-
-filter_folders() {
-    if [[ $folder != "." ]]; then
-        cat - | sed -i '' "s%${folder}%%g"
-    else
-        cat -
-    fi
+format_and_output() {
+    echo
+    echo reports/"$(basename "$report_file")"
+    head -n $((rows + 1)) "$report_file" | tr ',' '\t' | column -t
 }
 
 save_report() {
@@ -214,108 +171,164 @@ save_report() {
     echo "$file_path"
 }
 
-analyze() {
-    mkdir -p "$reports_path"
+# Generate supporting files
+{
+    generate_supporting_files() {
+        mkdir -p "$supporting_files_path" || exit
 
-    maat_analysis entity-ownership |
-        filter_folders |
-        save_report entity-ownership 1>/dev/null &
+        git log \
+            --follow \
+            --numstat \
+            --date=short \
+            --pretty=format:'--%h--%ad--%aN' \
+            --after="${after}" \
+            --before="${before}" \
+            -- "${folder}" |
+            run_python "${my_dir}/git/modify_git_log.py" >"$repo_log_path" || exit
 
-    maat_analysis_entity_effort |
-        filter_folders |
-        save_report author-entity-effort 1>/dev/null &
+    }
+}
 
-    summary=$(maat_analysis summary | save_report summary &)
+# Generate important reports
+{
 
-    sum_of_coupling=$(maat_analysis soc |
-        filter_folders | save_report sum-of-coupling &)
+    analyze() {
+        mkdir -p "$reports_path"
 
-    coupling=$(maat_analysis coupling \
-        --min-coupling 1 |
-        filter_folders | save_report temporal-coupling &)
+        maat_analysis entity-ownership |
+            filter_folders |
+            save_report entity-ownership 1>/dev/null &
 
-    complexity_effort=$(create_complexity_effort &)
+        create_entity_effort |
+            filter_folders |
+            save_report author-entity-effort 1>/dev/null &
+
+        summary=$(maat_analysis summary | save_report summary &)
+
+        sum_of_coupling=$(maat_analysis soc |
+            filter_folders | save_report sum-of-coupling &)
+
+        coupling=$(maat_analysis coupling \
+            --min-coupling 1 |
+            filter_folders | save_report temporal-coupling &)
+
+        complexity_effort=$(create_complexity_effort &)
+
+        wait
+
+        output_reports "$summary" "$sum_of_coupling" "$coupling" "$complexity_effort"
+    }
+
+    create_complexity_effort() {
+        maat_analysis revisions | filter_folders >"$revisions_path"
+
+        cloc "${folder}" \
+            --vcs git \
+            --by-file \
+            --csv \
+            --quiet >"$code_lines_path" || exit
+
+        local path
+        path=$(
+            run_python "${scripts_path}/merge/merge_comp_freqs.py" \
+                "$revisions_path" \
+                "$code_lines_path" |
+                filter_folders |
+                save_report hotspots
+        )
+
+        echo "$path"
+    }
+
+    create_entity_effort() {
+        # In addition to maat output, add percentages
+        maat_analysis entity-effort |
+            sed '/^entity,/s/$/,percentage/' |
+            awk 'BEGIN { FS=OFS="," } { 
+                if (NR > 1) { 
+                    percentage = ($3 / $4) * 100; 
+                    $0 = $0 OFS percentage 
+                } 
+                print 
+            }'
+    }
+
+    filter_folders() {
+        if [[ $folder != "." ]]; then
+            cat - | sed -i '' "s%${folder}%%g"
+        else
+            cat -
+        fi
+    }
+
+    output_reports() {
+        echo "Displaying the first" "$rows" "results in the most interesting reports."
+        echo "Full reports are in ${reports_path}"
+
+        for report_file in "$@"; do
+            format_and_output "$report_file"
+        done
+    }
+}
+
+# Hotspots
+{
+
+    prepare_hotspots() {
+        mkdir -p "$hotspots_path"
+        run_python "${scripts_path}/transform/csv_as_enclosure_json.py" \
+            --structure "$code_lines_path" \
+            --weights "$complexity_effort_path" >"$hotspots_json_path" || exit
+
+        copy_hotspots
+    }
+
+    copy_hotspots() {
+        hotspots_files=(crime-scene-hotspots.css crime-scene-hotspots.html crime-scene-hotspots.js LICENSE d3)
+
+        mkdir -p "$hotspots_path"
+
+        for hotspots_file in "${hotspots_files[@]}"; do
+            cp -R "${my_dir}/visualization/${hotspots_file}" "$hotspots_path"
+        done
+    }
+}
+
+# Other reports
+{
+    # Reports that I currently don't have a use for.
+    generate_other_reports() {
+        local other_reports_path="${reports_path}/other-reports"
+
+        mkdir -p "$other_reports_path" || exit
+
+        local other_reports=(fragmentation main-dev main-dev-by-revs refactoring-main-dev)
+
+        for other_report in "${other_reports[@]}"; do
+            maat_analysis \
+                "$other_report" >"${other_reports_path}/${other_report}.csv" &
+        done
+    }
+}
+
+main() {
+    generate_supporting_files || exit
+
+    analyze && prepare_hotspots &
+
+    if [[ $report_all -ne 0 ]]; then
+        generate_other_reports &
+    fi
 
     wait
 
-    output_reports "$summary" "$sum_of_coupling" "$coupling" "$complexity_effort"
+    if [[ $disable_server -eq 0 ]]; then
+        cd "$hotspots_path" || exit
+        echo
+        echo "Running on http://localhost:8888/crime-scene-hotspots.html" &&
+            run_python -m http.server 8888
+    fi
+
 }
 
-scripts_path="${my_dir}/../scripts"
-
-create_complexity_effort() {
-    maat_analysis revisions | filter_folders >"$revisions_path"
-
-    cloc "${folder}" \
-        --vcs git \
-        --by-file \
-        --csv \
-        --quiet >"$code_lines_path" || exit
-
-    local path
-    path=$(
-        run_python "${scripts_path}/merge/merge_comp_freqs.py" \
-            "$revisions_path" \
-            "$code_lines_path" |
-            filter_folders |
-            save_report hotspots
-    )
-
-    echo "$path"
-}
-
-format_and_output() {
-    echo
-    echo reports/"$(basename "$report_file")"
-    head -n $((rows + 1)) "$report_file" | tr ',' '\t' | column -t
-    echo
-}
-
-output_reports() {
-    echo "Displaying the first" "$rows" "results in each report."
-    echo "Full reports are in ${reports_path}"
-    echo
-
-    for report_file in "$@"; do
-        format_and_output "$report_file"
-    done
-}
-
-prepare_hotspots() {
-    mkdir -p "$hotspots_path"
-    run_python "${scripts_path}/transform/csv_as_enclosure_json.py" \
-        --structure "$code_lines_path" \
-        --weights "$complexity_effort_path" >"$hotspots_json_path" || exit
-
-    copy_hotspots
-}
-
-copy_hotspots() {
-    hotspots_files=(crime-scene-hotspots.css crime-scene-hotspots.html crime-scene-hotspots.js LICENSE d3)
-
-    mkdir -p "$hotspots_path"
-
-    for hotspots_file in "${hotspots_files[@]}"; do
-        cp -R "${my_dir}/visualization/${hotspots_file}" "$hotspots_path"
-    done
-}
-
-generate_supporting_files || exit
-
-analyze && prepare_hotspots
-
-# generate_supporting_files || exit
-
-# if [[ $report_all -ne 0 ]]; then
-#     generate_other_reports &
-# fi
-
-# analyze &&
-#     cleanup_reports &&
-#     output_reports &&
-#     copy_hotspots || exit
-
-# if [[ $disable_server -eq 0 ]]; then
-#     echo "Running on http://localhost:8888/crime-scene-hotspots.html" &&
-#         run_python -m http.server 8888
-# fi
+main
