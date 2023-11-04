@@ -138,12 +138,6 @@ my_dir=$(cd -- "$(dirname -- $(readlink -f "${BASH_SOURCE[0]}"))" &>/dev/null &&
 
 reports_path="$(pwd)/reports"
 supporting_files_path="${reports_path}/supporting-files"
-scripts_path="${my_dir}/../scripts"
-
-# Report paths
-author_entity_effort_path="${reports_path}/author-entity-effort.csv"
-entity_ownership_path="${reports_path}/entity-ownership.csv"
-summary_path="${reports_path}/summary.csv"
 
 # Hotspots
 hotspots_path="${reports_path}/hotspots"
@@ -177,7 +171,6 @@ generate_supporting_files() {
         -- "${folder}" |
         run_python "${my_dir}/git/modify_git_log.py" >"$repo_log_path" || exit
 
-    cloc "${folder}" --vcs git --by-file --csv --quiet >"$code_lines_path" || exit
 }
 
 # Reports that I currently don't have a use for.
@@ -204,43 +197,78 @@ maat_analysis_entity_effort() {
                     $0 = $0 OFS percentage 
                 } 
                 print 
-            }' >"$author_entity_effort_path" &
+            }'
+}
+
+filter_folders() {
+    if [[ $folder != "." ]]; then
+        cat - | sed -i '' "s%${folder}%%g"
+    else
+        cat -
+    fi
+}
+
+save_report() {
+    file_path="${reports_path}/$1.csv"
+    cat - >"$file_path"
+    echo "$file_path"
 }
 
 analyze() {
-    maat_analysis summary >"$summary_path" &
-    maat_analysis revisions >"$revisions_path" &
-    maat_analysis soc >"$sum_of_coupling_path" &
-    maat_analysis entity-ownership >"$entity_ownership_path" &
-    maat_analysis coupling --min-coupling 1 >"$temporal_coupling_path" &
+    mkdir -p "$reports_path"
 
-    maat_analysis_entity_effort
+    maat_analysis entity-ownership |
+        filter_folders |
+        save_report entity-ownership 1>/dev/null &
+
+    maat_analysis_entity_effort |
+        filter_folders |
+        save_report author-entity-effort 1>/dev/null &
+
+    summary=$(maat_analysis summary | save_report summary &)
+
+    sum_of_coupling=$(maat_analysis soc |
+        filter_folders | save_report sum-of-coupling &)
+
+    coupling=$(maat_analysis coupling \
+        --min-coupling 1 |
+        filter_folders | save_report temporal-coupling &)
+
+    complexity_effort=$(create_complexity_effort &)
 
     wait
 
-    run_python "${scripts_path}/merge/merge_comp_freqs.py" \
-        "$revisions_path" \
-        "$code_lines_path" >"$complexity_effort_path" || exit
-
-    mkdir -p "$hotspots_path"
-
-    run_python "${scripts_path}/transform/csv_as_enclosure_json.py" \
-        --structure "$code_lines_path" \
-        --weights "$complexity_effort_path" >"$hotspots_json_path" || exit
+    output_reports "$summary" "$sum_of_coupling" "$coupling" "$complexity_effort"
 }
 
-cleanup_reports() {
-    local report_files=(
-        "$complexity_effort_path"
-        "$sum_of_coupling_path"
-        "$temporal_coupling_path"
+scripts_path="${my_dir}/../scripts"
+
+create_complexity_effort() {
+    maat_analysis revisions | filter_folders >"$revisions_path"
+
+    cloc "${folder}" \
+        --vcs git \
+        --by-file \
+        --csv \
+        --quiet >"$code_lines_path" || exit
+
+    local path
+    path=$(
+        run_python "${scripts_path}/merge/merge_comp_freqs.py" \
+            "$revisions_path" \
+            "$code_lines_path" |
+            filter_folders |
+            save_report hotspots
     )
 
-    if [[ $folder != "." ]]; then
-        for report_file in "${report_files[@]}"; do
-            sed -i '' "s%${folder}%%g" "$report_file"
-        done
-    fi
+    echo "$path"
+}
+
+format_and_output() {
+    echo
+    echo reports/"$(basename "$report_file")"
+    head -n $((rows + 1)) "$report_file" | tr ',' '\t' | column -t
+    echo
 }
 
 output_reports() {
@@ -248,13 +276,18 @@ output_reports() {
     echo "Full reports are in ${reports_path}"
     echo
 
-    local report_files=("${summary_path}" "${complexity_effort_path}" "${sum_of_coupling_path}" "${temporal_coupling_path}")
-
-    for report_file in "${report_files[@]}"; do
-        echo reports/"$(basename "$report_file")"
-        head -n $((rows + 1)) "$report_file" | tr ',' '\t' | column -t
-        echo
+    for report_file in "$@"; do
+        format_and_output "$report_file"
     done
+}
+
+prepare_hotspots() {
+    mkdir -p "$hotspots_path"
+    run_python "${scripts_path}/transform/csv_as_enclosure_json.py" \
+        --structure "$code_lines_path" \
+        --weights "$complexity_effort_path" >"$hotspots_json_path" || exit
+
+    copy_hotspots
 }
 
 copy_hotspots() {
@@ -269,16 +302,20 @@ copy_hotspots() {
 
 generate_supporting_files || exit
 
-if [[ $report_all -ne 0 ]]; then
-    generate_other_reports &
-fi
+analyze && prepare_hotspots
 
-analyze &&
-    cleanup_reports &&
-    output_reports &&
-    copy_hotspots || exit
+# generate_supporting_files || exit
 
-if [[ $disable_server -eq 0 ]]; then
-    echo "Running on http://localhost:8888/crime-scene-hotspots.html" &&
-        run_python -m http.server 8888
-fi
+# if [[ $report_all -ne 0 ]]; then
+#     generate_other_reports &
+# fi
+
+# analyze &&
+#     cleanup_reports &&
+#     output_reports &&
+#     copy_hotspots || exit
+
+# if [[ $disable_server -eq 0 ]]; then
+#     echo "Running on http://localhost:8888/crime-scene-hotspots.html" &&
+#         run_python -m http.server 8888
+# fi
