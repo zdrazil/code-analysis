@@ -179,7 +179,7 @@ save_report() {
 # Generate supporting files
 {
     generate_supporting_files() {
-        mkdir -p "$supporting_files_path" || exit
+        mkdir -p "$supporting_files_path"
 
         git log \
             --follow \
@@ -228,13 +228,15 @@ save_report() {
     }
 
     create_complexity_effort() {
-        maat_analysis revisions | filter_folders >"$revisions_path"
+        maat_analysis revisions | filter_folders >"$revisions_path" &
 
         cloc "${folder}" \
             --vcs git \
             --by-file \
             --csv \
-            --quiet >"$code_lines_path" || exit
+            --quiet >"$code_lines_path" &
+
+        wait
 
         local path
         path=$(
@@ -287,8 +289,6 @@ save_report() {
         run_python "${scripts_path}/transform/csv_as_enclosure_json.py" \
             --structure "$code_lines_path" \
             --weights "$complexity_effort_path" >"$hotspots_json_path"
-
-        copy_hotspots
     }
 
     copy_hotspots() {
@@ -324,6 +324,7 @@ main() {
 
     analyze
     prepare_hotspots &
+    copy_hotspots $
 
     if [[ $report_all -ne 0 ]]; then
         generate_other_reports &
