@@ -147,6 +147,10 @@ run_complexity_trend() {
             -- "${file}"
     )
 
+    if [ ! -s "$log" ]; then
+        die "ERROR: The date range before: ${before}, after: ${after} contains less than two commits, which is not enough for plotting a trend. Please try a different date range."
+    fi
+
     end=$(echo "${log}" | head -n 1)
     start=$(echo "${log}" | tail -n 1)
 

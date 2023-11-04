@@ -186,6 +186,9 @@ save_report() {
             -- "${folder}" |
             run_python "${my_dir}/git/modify_git_log.py" >"$repo_log_path" || exit
 
+        if [ ! -s "$repo_log_path" ]; then
+            die "ERROR: No commits were found in the given date range, before: ${before}, after: ${after}. Please try a different date range."
+        fi
     }
 }
 
