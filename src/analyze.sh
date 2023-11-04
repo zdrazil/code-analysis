@@ -175,7 +175,7 @@ create_report_file_path() {
 }
 
 save_report() {
-    file_path=$(create_report_file_path $1)
+    file_path=$(create_report_file_path "$1")
     cat - >"$file_path"
 }
 
