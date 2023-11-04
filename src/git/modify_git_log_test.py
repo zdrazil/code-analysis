@@ -4,7 +4,7 @@ import git.modify_git_log as modify_git_log
 
 
 class TestModifyGitLog(unittest.TestCase):
-    def test_upper(self):
+    def test_main(self):
         input = """
 0	0	src/{modules => views}/file.py
 0	2	src/modules/file.py

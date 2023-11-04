@@ -35,6 +35,8 @@ Case 2 is the more worrying one. To identify if that's the case, use "sd" (stand
     --column <name>     Name of  the column to plot.
                         Column names: n, total, mean, sd.
                         Default "total".
+    
+    --disable-server    Generate reports without enabling the server.
 EOF
 }
 
@@ -48,6 +50,7 @@ die() {
 after="6 months"
 before=tomorrow
 column=total
+disable_server=0
 
 while :; do
     case $1 in
@@ -96,6 +99,9 @@ while :; do
         ;;
     --column=) # Handle the case of an empty --column=
         die 'ERROR: "--column" requires a non-empty option argument.'
+        ;;
+    --disable-server)
+        disable_server=$((disable_server + 1))
         ;;
     --) # End of all options.
         shift
@@ -174,6 +180,10 @@ generate() {
     trend=$(run_complexity_trend)
 
     output_trend "$trend"
+
+    if [[ $disable_server -ne 0 ]]; then
+        exit 0
+    fi
 
     column_number=$(get_column_number "$trend" "$column")
 

@@ -33,6 +33,8 @@ Reading Your Code as a Crime Scene is highly recommended to understand the repor
 
     -a, --all            Output all reports, not just the main ones. Main ones 
                          are the ones I am using.
+
+    --disable-server     Generate reports without enabling the server.
 EOF
 }
 
@@ -47,6 +49,7 @@ after="6 months"
 before="tomorrow"
 rows="10"
 report_all=0
+disable_server=0
 
 while :; do
     case $1 in
@@ -98,6 +101,9 @@ while :; do
         ;;
     -a | --all)
         report_all=$((report_all + 1))
+        ;;
+    --disable-server)
+        disable_server=$((disable_server + 1))
         ;;
     --) # End of all options.
         shift
@@ -270,7 +276,9 @@ fi
 analyze &&
     cleanup_reports &&
     output_reports &&
-    copy_hotspots &&
-    cd "${reports_path}/hotspots" &&
+    copy_hotspots || exit
+
+if [[ $disable_server -eq 0 ]]; then
     echo "Running on http://localhost:8888/crime-scene-hotspots.html" &&
-    run_python -m http.server 8888
+        run_python -m http.server 8888
+fi
