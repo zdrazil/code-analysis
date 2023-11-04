@@ -206,6 +206,8 @@ save_report() {
     analyze() {
         mkdir -p "$reports_path"
 
+        create_complexity_effort &
+
         maat_analysis entity-ownership |
             filter_folders |
             save_report entity-ownership 1>/dev/null &
@@ -223,11 +225,9 @@ save_report() {
             --min-coupling 1 |
             filter_folders | save_report temporal-coupling &
 
-        create_complexity_effort &
-
         wait
 
-        output_reports summary sum-of-coupling temporal-coupling hotspots
+        output_reports summary hotspots sum-of-coupling temporal-coupling
     }
 
     create_complexity_effort() {
