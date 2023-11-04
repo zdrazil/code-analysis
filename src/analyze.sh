@@ -2,6 +2,11 @@
 
 trap 'pkill -P $$; exit' SIGINT SIGTERM
 
+set -o errexit  # Exit on error. Append "|| true" if you expect an error.
+set -o errtrace # Exit on error inside any functions or subshells.
+set -o pipefail
+# set -o xtrace # Turn on traces, useful while debugging but commented out by default
+
 # Usage info
 show_help() {
     cat <<EOF
@@ -184,9 +189,9 @@ save_report() {
             --after="${after}" \
             --before="${before}" \
             -- "${folder}" |
-            run_python "${my_dir}/git/modify_git_log.py" >"$repo_log_path" || exit
+            run_python "${my_dir}/git/modify_git_log.py" >"$repo_log_path"
 
-        if [ ! -s "$repo_log_path" ]; then
+        if [[ ! -s $repo_log_path ]]; then
             die "ERROR: No commits were found in the given date range, before: ${before}, after: ${after}. Please try a different date range."
         fi
     }
@@ -281,7 +286,7 @@ save_report() {
         mkdir -p "$hotspots_path"
         run_python "${scripts_path}/transform/csv_as_enclosure_json.py" \
             --structure "$code_lines_path" \
-            --weights "$complexity_effort_path" >"$hotspots_json_path" || exit
+            --weights "$complexity_effort_path" >"$hotspots_json_path"
 
         copy_hotspots
     }
@@ -303,7 +308,7 @@ save_report() {
     generate_other_reports() {
         local other_reports_path="${reports_path}/other-reports"
 
-        mkdir -p "$other_reports_path" || exit
+        mkdir -p "$other_reports_path"
 
         local other_reports=(fragmentation main-dev main-dev-by-revs refactoring-main-dev)
 
@@ -315,9 +320,10 @@ save_report() {
 }
 
 main() {
-    generate_supporting_files || exit
+    generate_supporting_files
 
-    analyze && prepare_hotspots &
+    analyze
+    prepare_hotspots &
 
     if [[ $report_all -ne 0 ]]; then
         generate_other_reports &
@@ -326,7 +332,7 @@ main() {
     wait
 
     if [[ $disable_server -eq 0 ]]; then
-        cd "$hotspots_path" || exit
+        cd "$hotspots_path"
         echo
         echo "Running on http://localhost:8888/crime-scene-hotspots.html" &&
             run_python -m http.server 8888

@@ -2,6 +2,11 @@
 
 trap 'pkill -P $$; exit' SIGINT SIGTERM
 
+set -o errexit  # Exit on error. Append "|| true" if you expect an error.
+set -o errtrace # Exit on error inside any functions or subshells.
+set -o pipefail
+# set -o xtrace # Turn on traces, useful while debugging but commented out by default
+
 # Usage info
 show_help() {
     cat <<EOF
@@ -147,7 +152,7 @@ run_complexity_trend() {
             -- "${file}"
     )
 
-    if [ ! -s "$log" ]; then
+    if [[ -z $log ]]; then
         die "ERROR: The date range before: ${before}, after: ${after} contains less than two commits, which is not enough for plotting a trend. Please try a different date range."
     fi
 
@@ -155,7 +160,7 @@ run_complexity_trend() {
     start=$(echo "${log}" | tail -n 1)
 
     run_python "${my_dir}/file-complexity/git_complexity_trend_enhanced.py" \
-        --start "$start" --end "${end}" \
+        --start "$start" --end "$end" \
         --file "$file"
 }
 
