@@ -170,10 +170,13 @@ format_and_output() {
     head -n $((rows + 1)) "$report_file" | tr ',' '\t' | column -t
 }
 
+create_report_file_path() {
+    echo "${reports_path}/$1.csv"
+}
+
 save_report() {
-    file_path="${reports_path}/$1.csv"
+    file_path=$(create_report_file_path $1)
     cat - >"$file_path"
-    echo "$file_path"
 }
 
 # Generate supporting files
@@ -211,20 +214,20 @@ save_report() {
             filter_folders |
             save_report author-entity-effort 1>/dev/null &
 
-        summary=$(maat_analysis summary | save_report summary &)
+        maat_analysis summary | save_report summary &
 
-        sum_of_coupling=$(maat_analysis soc |
-            filter_folders | save_report sum-of-coupling &)
+        maat_analysis soc |
+            filter_folders | save_report sum-of-coupling &
 
-        coupling=$(maat_analysis coupling \
+        maat_analysis coupling \
             --min-coupling 1 |
-            filter_folders | save_report temporal-coupling &)
+            filter_folders | save_report temporal-coupling &
 
-        complexity_effort=$(create_complexity_effort &)
+        create_complexity_effort &
 
         wait
 
-        output_reports "$summary" "$sum_of_coupling" "$coupling" "$complexity_effort"
+        output_reports summary sum-of-coupling temporal-coupling hotspots
     }
 
     create_complexity_effort() {
@@ -238,16 +241,12 @@ save_report() {
 
         wait
 
-        local path
-        path=$(
-            run_python "${scripts_path}/merge/merge_comp_freqs.py" \
-                "$revisions_path" \
-                "$code_lines_path" |
-                filter_folders |
-                save_report hotspots
-        )
+        run_python "${scripts_path}/merge/merge_comp_freqs.py" \
+            "$revisions_path" \
+            "$code_lines_path" |
+            filter_folders |
+            save_report hotspots
 
-        echo "$path"
     }
 
     create_entity_effort() {
@@ -275,7 +274,8 @@ save_report() {
         echo "Displaying the first" "$rows" "results in the most interesting reports."
         echo "Full reports are in ${reports_path}"
 
-        for report_file in "$@"; do
+        for report_name in "$@"; do
+            report_file=$(create_report_file_path "$report_name")
             format_and_output "$report_file"
         done
     }
