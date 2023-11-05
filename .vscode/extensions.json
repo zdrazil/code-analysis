@@ -4,6 +4,7 @@
     "foxundermoon.shell-format",
     "GrapeCity.gc-excelviewer",
     "ms-python.black-formatter",
+    "rogalmic.bash-debug",
     "timonwong.shellcheck"
   ]
 }
