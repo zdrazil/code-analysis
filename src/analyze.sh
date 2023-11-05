@@ -141,204 +141,39 @@ fi
 # shellcheck disable=SC2046
 my_dir=$(cd -- "$(dirname -- $(readlink -f "${BASH_SOURCE[0]}"))" &>/dev/null && pwd)
 
-reports_path="$(pwd)/reports"
-supporting_files_path="${reports_path}/supporting-files"
-scripts_path="${my_dir}/../scripts"
-
-# Hotspots
-hotspots_path="${reports_path}/hotspots"
-hotspots_json_path="${hotspots_path}/hotspots.json"
-
-# Supporting files
-code_lines_path="${supporting_files_path}/lines.csv"
-repo_log_path="${supporting_files_path}/repo.log"
-revisions_path="${supporting_files_path}/revisions.csv"
-
 source "$my_dir/constants/reports-paths.sh"
 
-run_python() {
-    "${my_dir}/../.venv/bin/python" "$@"
-}
-
-maat_analysis() {
-    maat -l "$repo_log_path" -c git2 -a "$@"
-}
-
-format_and_output() {
-    echo
-    echo reports/"$(basename "$report_file")"
-    head -n $((rows + 1)) "$report_file" | tr ',' '\t' | column -t
-}
-
-create_report_file_path() {
-    echo "${reports_path}/$1.csv"
-}
-
-save_report() {
-    file_path=$(create_report_file_path "$1")
-    cat - >"$file_path"
-}
-
-# Generate supporting files
-{
-    generate_supporting_files() {
-        mkdir -p "$supporting_files_path"
-
-        git log \
-            --follow \
-            --numstat \
-            --date=short \
-            --pretty=format:'--%h--%ad--%aN' \
-            --after="${after}" \
-            --before="${before}" \
-            -- "${folder}" |
-            run_python "${my_dir}/git/modify_git_log.py" >"$repo_log_path"
-
-        if [[ ! -s $repo_log_path ]]; then
-            die "ERROR: No commits were found in the given date range, before: ${before}, after: ${after}. Please try a different date range."
-        fi
-    }
-}
-
-# Generate important reports
-{
-
-    analyze() {
-        mkdir -p "$reports_path"
-
-        create_complexity_effort &
-
-        maat_analysis entity-ownership |
-            filter_folders |
-            save_report entity-ownership 1>/dev/null &
-
-        create_entity_effort |
-            filter_folders |
-            save_report author-entity-effort 1>/dev/null &
-
-        maat_analysis summary | save_report summary &
-
-        maat_analysis soc |
-            filter_folders | save_report sum-of-coupling &
-
-        maat_analysis coupling \
-            --min-coupling 1 |
-            filter_folders | save_report temporal-coupling &
-
-        wait
-
-        output_reports summary hotspots sum-of-coupling temporal-coupling
-    }
-
-    create_complexity_effort() {
-        maat_analysis revisions | filter_folders >"$revisions_path" &
-
-        cloc "${folder}" \
-            --vcs git \
-            --by-file \
-            --csv \
-            --quiet >"$code_lines_path" &
-
-        wait
-
-        run_python "${scripts_path}/merge/merge_comp_freqs.py" \
-            "$revisions_path" \
-            "$code_lines_path" |
-            filter_folders |
-            save_report hotspots
-
-    }
-
-    create_entity_effort() {
-        # In addition to maat output, add percentages
-        maat_analysis entity-effort |
-            sed '/^entity,/s/$/,percentage/' |
-            awk 'BEGIN { FS=OFS="," } { 
-                if (NR > 1) { 
-                    percentage = ($3 / $4) * 100; 
-                    $0 = $0 OFS percentage 
-                } 
-                print 
-            }'
-    }
-
-    filter_folders() {
-        if [[ $folder != "." ]]; then
-            cat - | sed -i '' "s%${folder}%%g"
-        else
-            cat -
-        fi
-    }
-
-    output_reports() {
-        echo "Displaying the first" "$rows" "results in the most interesting reports."
-        echo "Full reports are in ${reports_path}"
-
-        for report_name in "$@"; do
-            report_file=$(create_report_file_path "$report_name")
-            format_and_output "$report_file"
-        done
-    }
-}
+declare -rx SUPPORTING_FILES_PATH="${REPORTS_PATH}/supporting-files"
+declare -rx SCRIPTS_PATH="${my_dir}/../scripts"
 
 # Hotspots
-{
+declare -rx HOTSPOTS_PATH="${REPORTS_PATH}/hotspots"
 
-    prepare_hotspots() {
-        mkdir -p "$hotspots_path"
-        run_python "${scripts_path}/transform/csv_as_enclosure_json.py" \
-            --structure "$code_lines_path" \
-            --weights "$complexity_effort_path" >"$hotspots_json_path"
-    }
-
-    copy_hotspots() {
-        hotspots_files=(crime-scene-hotspots.css crime-scene-hotspots.html crime-scene-hotspots.js LICENSE d3)
-
-        mkdir -p "$hotspots_path"
-
-        for hotspots_file in "${hotspots_files[@]}"; do
-            cp -R "${my_dir}/visualization/${hotspots_file}" "$hotspots_path"
-        done
-    }
-}
-
-# Other reports
-{
-    # Reports that I currently don't have a use for.
-    generate_other_reports() {
-        local other_reports_path="${reports_path}/other-reports"
-
-        mkdir -p "$other_reports_path"
-
-        local other_reports=(fragmentation main-dev main-dev-by-revs refactoring-main-dev)
-
-        for other_report in "${other_reports[@]}"; do
-            maat_analysis \
-                "$other_report" >"${other_reports_path}/${other_report}.csv" &
-        done
-    }
-}
+# Supporting files
+declare -rx CODE_LINES_PATH="${SUPPORTING_FILES_PATH}/lines.csv"
+declare -rx REPO_LOG_PATH="${SUPPORTING_FILES_PATH}/repo.log"
 
 main() {
-    generate_supporting_files
+    export PATH="$PATH:$my_dir/analyze-all"
 
-    analyze
-    prepare_hotspots &
-    copy_hotspots $
+    generate-supporting-files.sh "$before" "$after" "$folder"
+
+    generate-important-reports.sh "$folder" "$rows"
 
     if [[ $report_all -ne 0 ]]; then
-        generate_other_reports &
+        generate-other-reports.sh &
     fi
+
+    generate-hotspots.sh &
 
     wait
 
     if [[ $disable_server -eq 0 ]]; then
-        cd "$hotspots_path"
+        cd "$HOTSPOTS_PATH"
         echo
         echo "Running on http://localhost:8888/crime-scene-hotspots.html" &&
-            run_python -m http.server 8888
+            python3 -m http.server 8888
     fi
-
 }
 
 main

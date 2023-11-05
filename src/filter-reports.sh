@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 
-set -o errexit  # Exit on error. Append "|| true" if you expect an error.
-set -o errtrace # Exit on error inside any functions or subshells.
-set -o pipefail
-# set -o xtrace # Turn on traces, useful while debugging but commented out by default
+set -o errexit -o errtrace -o pipefail -o nounset
 
 # Usage info
 show_help() {
@@ -92,10 +89,10 @@ get_filtered_file_path() {
 }
 
 filter_reports() {
-    report_files=("$complexity_effort_path" "$sum_of_coupling_path" "$temporal_coupling_path")
+    report_files=("$COMPLEXITY_EFFORT_PATH" "$sum_of_coupling_path" "$temporal_coupling_path")
 
     echo "Displaying the first $rows results in each report."
-    echo "Full reports are in $reports_path "
+    echo "Full reports are in $REPORTS_PATH "
     echo
 
     for report_file in "${report_files[@]}"; do

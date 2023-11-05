@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 
-set -o errexit  # Exit on error. Append "|| true" if you expect an error.
-set -o errtrace # Exit on error inside any functions or subshells.
-set -o pipefail
-# set -o xtrace # Turn on traces, useful while debugging but commented out by default
+set -o errexit -o errtrace -o pipefail -o nounset
 
 # Command works like git show --follow would, if it existed.
 

@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC2034
 
-reports_path="$(pwd)/reports"
+pwd=$(pwd)
+declare -rx REPORTS_PATH="$pwd/reports"
 
-complexity_effort_path="${reports_path}/hotspots.csv"
-sum_of_coupling_path="${reports_path}/sum-of-coupling.csv"
-temporal_coupling_path="${reports_path}/temporal-coupling.csv"
+declare -rx COMPLEXITY_EFFORT_PATH="${REPORTS_PATH}/hotspots.csv"
+
+sum_of_coupling_path="${REPORTS_PATH}/sum-of-coupling.csv"
+temporal_coupling_path="${REPORTS_PATH}/temporal-coupling.csv"
