@@ -119,8 +119,7 @@ while :; do
     shift
 done
 
-# shellcheck disable=SC2046
-my_dir=$(cd -- "$(dirname -- $(readlink -f "${BASH_SOURCE[0]}"))" &>/dev/null && pwd)
+my_dir=$(cd -- "$(dirname -- "$(readlink -f "${BASH_SOURCE[0]}")")" &>/dev/null && pwd)
 
 file=$*
 

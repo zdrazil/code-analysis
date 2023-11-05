@@ -2,8 +2,7 @@
 
 set -o errexit -o errtrace -o pipefail -o nounset
 
-# shellcheck disable=SC2046
-my_dir=$(cd -- "$(dirname -- $(readlink -f "${BASH_SOURCE[0]}"))" &>/dev/null && pwd)
+my_dir=$(cd -- "$(dirname -- "$(readlink -f "${BASH_SOURCE[0]}")")" &>/dev/null && pwd)
 
 # Expected variables:
 # HOTSPOTS_PATH

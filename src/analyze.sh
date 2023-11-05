@@ -138,20 +138,20 @@ fi
 # will remain in the "$@" positional parameters.
 
 # Base paths
-# shellcheck disable=SC2046
-my_dir=$(cd -- "$(dirname -- $(readlink -f "${BASH_SOURCE[0]}"))" &>/dev/null && pwd)
+
+my_dir=$(cd -- "$(dirname -- "$(readlink -f "${BASH_SOURCE[0]}")")" &>/dev/null && pwd)
 
 source "$my_dir/constants/reports-paths.sh"
 
-declare -rx SUPPORTING_FILES_PATH="${REPORTS_PATH}/supporting-files"
-declare -rx SCRIPTS_PATH="${my_dir}/../scripts"
+export SUPPORTING_FILES_PATH="${REPORTS_PATH}/supporting-files"
+export SCRIPTS_PATH="${my_dir}/../scripts"
 
 # Hotspots
-declare -rx HOTSPOTS_PATH="${REPORTS_PATH}/hotspots"
+export HOTSPOTS_PATH="${REPORTS_PATH}/hotspots"
 
 # Supporting files
-declare -rx CODE_LINES_PATH="${SUPPORTING_FILES_PATH}/lines.csv"
-declare -rx REPO_LOG_PATH="${SUPPORTING_FILES_PATH}/repo.log"
+export CODE_LINES_PATH="${SUPPORTING_FILES_PATH}/lines.csv"
+export REPO_LOG_PATH="${SUPPORTING_FILES_PATH}/repo.log"
 
 main() {
     export PATH="$PATH:$my_dir/analyze-all"
