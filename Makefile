@@ -11,6 +11,7 @@ build: clone_scripts download_maat
 	python3 -m venv .venv
 	.venv/bin/pip install -r $(scripts_path)/requirements.txt
 
+# commit which was tested: 9c993a9
 clone_scripts:
 	echo "$(scripts_path)"
 	test -d $(scripts_path) || git clone \
